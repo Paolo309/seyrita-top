@@ -28,6 +28,7 @@ chs-hw-init: update_plic gen_idma_hw $(CHIM_SW_LIB) ## Generate Cheshire RTL
 
 .PHONY: snitch-hw-init
 snitch-hw-init: ## Generate Snitch RTL
+	make -C $(SNITCH_ROOT)/target/snitch_cluster sw/runtime/rtl
 	make -C $(SNITCH_ROOT)/target/snitch_cluster bin/snitch_cluster.vsim
 
 .PHONY: $(CHIM_SW_DIR)/include/regs/soc_ctrl.h

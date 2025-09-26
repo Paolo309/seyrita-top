@@ -10,6 +10,11 @@ ifndef chim_sw_mk
 chim_sw_mk=1
 
 CHS_SW_INCLUDES += -I$(CHIM_SW_DIR)/include
+CHS_SW_INCLUDES += -I$(SNITCH_ROOT)/target/snitch_cluster/sw/runtime/rtl/src
+CHS_SW_INCLUDES += -I$(SNITCH_ROOT)/sw/snRuntime/src
+CHS_SW_INCLUDES += -I$(SNITCH_ROOT)/sw/snRuntime/api
+CHS_SW_INCLUDES += -I$(SNITCH_ROOT)/target/snitch_cluster/sw/runtime/common
+
 
 
 # SCHEREMO: use im for platform-level SW, as the smallest common denominator between CVA6 and the Snitch cluster.
