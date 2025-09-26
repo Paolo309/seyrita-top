@@ -39,6 +39,7 @@ sources:
 
   # List of clusters
   - hw/clusters/chimera_cluster.sv
+  - hw/clusters/dummy_accelerator.sv
 
   # Top Level Domains
   - hw/chimera_clu_domain.sv

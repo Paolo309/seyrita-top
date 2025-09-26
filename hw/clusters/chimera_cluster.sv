@@ -107,6 +107,12 @@ module chimera_cluster
   axi_cluster_out_narrow_req_t              clu_axi_adapter_mst_req;
   axi_cluster_out_narrow_resp_t             clu_axi_adapter_mst_resp;
 
+  // Demux-side in- and out- narrow ports used in demux
+  axi_cluster_out_narrow_req_t              clu_axi_demux_mst_req;
+  axi_cluster_out_narrow_resp_t             clu_axi_demux_mst_resp;
+  axi_cluster_in_narrow_req_t               clu_axi_demux_slv_req;
+  axi_cluster_in_narrow_resp_t              clu_axi_demux_slv_resp;
+
   // Cluster-side in- and out- narrow ports used in narrow adapter
   axi_cluster_in_narrow_socIW_req_t         clu_axi_narrow_slv_req;
   axi_cluster_in_narrow_socIW_resp_t        clu_axi_narrow_slv_rsp;
@@ -193,8 +199,8 @@ module chimera_cluster
 
     .clu_narrow_in_req_o  (clu_axi_adapter_slv_req),
     .clu_narrow_in_resp_i (clu_axi_adapter_slv_resp),
-    .clu_narrow_out_req_i (clu_axi_adapter_mst_req),
-    .clu_narrow_out_resp_o(clu_axi_adapter_mst_resp),
+    .clu_narrow_out_req_i (clu_axi_demux_mst_req),  // clu_axi_adapter_mst_req
+    .clu_narrow_out_resp_o(clu_axi_demux_mst_resp), // clu_axi_adapter_mst_resp
 
     .wide_out_req_o     (wide_out_req_o),
     .wide_out_resp_i    (wide_out_resp_i),
@@ -294,4 +300,52 @@ module chimera_cluster
     .wide_out_resp_i  (clu_axi_wide_mst_resp)
 
   );
+
+  axi_cluster_out_narrow_req_t dummy_axi_demux_mst_req;
+  axi_cluster_out_narrow_resp_t dummy_axi_demux_mst_resp;
+
+  dummy_accelerator #(
+    .axi_req_t       (axi_cluster_out_narrow_req_t),
+    .axi_resp_t      (axi_cluster_out_narrow_resp_t),
+    .CountdownCycles (Cfg.DummyCfg.CountdownCycles),
+    .BusyValue       (Cfg.DummyCfg.BusyValue)
+  ) i_dummy_accelerator (
+    .clk_i (clu_clk_i),
+    .rst_ni,
+    .slv_req_i  (dummy_axi_demux_mst_req),
+    .slv_resp_o (dummy_axi_demux_mst_resp)
+  );
+
+  wire select_stub_ar = ~(clu_axi_adapter_mst_req.ar_valid && 
+                        (clu_axi_adapter_mst_req.ar.addr == Cfg.DummyCfg.Address));
+  wire select_stub_aw = ~(clu_axi_adapter_mst_req.aw_valid && 
+                        (clu_axi_adapter_mst_req.aw.addr == Cfg.DummyCfg.Address));
+  
+  axi_demux_simple #(
+    .AxiIdWidth  ($bits(clu_axi_adapter_mst_req.aw.id)),
+    .AtopSupport (1'b0),
+    .axi_req_t   (axi_cluster_out_narrow_req_t),
+    .axi_resp_t  (axi_cluster_out_narrow_resp_t),
+    .NoMstPorts  (2),
+    .MaxTrans    (8),
+    .AxiLookBits (3),
+    .UniqueIds   (1'b0)
+  ) i_axi_demux (
+    .clk_i(clu_clk_i),
+    .rst_ni,
+    .test_i('0),
+
+    // slave ports
+    .slv_req_i  (clu_axi_adapter_mst_req),
+    .slv_resp_o (clu_axi_adapter_mst_resp),
+    
+    // slave select
+    .slv_aw_select_i (select_stub_aw),
+    .slv_ar_select_i (select_stub_ar),
+    
+    // master ports
+    .mst_reqs_o  ({/* to SoC */   clu_axi_demux_mst_req,  /* to dummy */   dummy_axi_demux_mst_req }),
+    .mst_resps_i ({/* from SoC */ clu_axi_demux_mst_resp, /* from dummy */ dummy_axi_demux_mst_resp})
+  );
+
 endmodule

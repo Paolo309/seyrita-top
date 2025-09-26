@@ -53,6 +53,15 @@ package chimera_pkg;
 
   localparam int ExtCores = _sumVector(ChimeraClusterCfg.NrCores, ExtClusters);
 
+  // -----------------------------------
+  // |  Dummy accelerator config       |
+  // -----------------------------------
+  typedef struct packed {
+    int unsigned CountdownCycles;
+    int unsigned BusyValue;
+    doub_bt      Address;
+  } dummy_config_t;
+
   // --------------------------
   // |       Soc config       |
   // --------------------------
@@ -60,6 +69,7 @@ package chimera_pkg;
   // Configuration struct for Chimera: it includes the Cheshire Cfg
   typedef struct packed {
     cheshire_cfg_t ChsCfg;
+    dummy_config_t DummyCfg;
     doub_bt        MemIslRegionStart;
     doub_bt        MemIslRegionEnd;
     aw_bt          MemIslAxiMstIdWidth;
@@ -157,6 +167,7 @@ ExtClusters
 
     chimera_cfg_t  chimera_cfg;
     cheshire_cfg_t cfg = DefaultCfg;
+    dummy_config_t dummy_cfg;
 
     // Global CFG
 
@@ -206,8 +217,14 @@ ExtClusters
     cfg.NumExtDbgHarts = ExtCores;
     cfg.NumExtOutIntrTgts = ExtCores;
 
+    // DUMMY ACCELERATOR CFG
+    dummy_cfg.CountdownCycles = 1000;
+    dummy_cfg.BusyValue = 'hFFFF_FFFF;
+    dummy_cfg.Address = 64'h40F0_0000;
+
     chimera_cfg = '{
         ChsCfg                    : cfg,
+        DummyCfg                  : dummy_cfg,
         MemIslRegionStart         : MemIslRegionStart,
         MemIslRegionEnd           : MemIslRegionEnd,
         MemIslAxiMstIdWidth       : MemIslAxiMstIdWidth,
