@@ -28,7 +28,7 @@ chs-hw-init: update_plic gen_idma_hw $(CHIM_SW_LIB) ## Generate Cheshire RTL
 
 .PHONY: snitch-hw-init
 snitch-hw-init: ## Generate Snitch RTL
-	make -C $(SNITCH_ROOT)/target/snitch_cluster bin/snitch_cluster.vsim
+	make -C $(SNITCH_ROOT) vsim CFG_OVERRIDE=$(SNITCH_ROOT)/cfg/mxita.json
 
 .PHONY: $(CHIM_SW_DIR)/include/regs/soc_ctrl.h
 $(CHIM_SW_DIR)/include/regs/soc_ctrl.h: $(CHIM_ROOT)/hw/regs/chimera_regs.hjson

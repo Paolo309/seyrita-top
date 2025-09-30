@@ -242,7 +242,7 @@ module chimera_cluster
 
     .ICacheLineWidth('{256}),
     .ICacheLineCount('{16}),
-    .ICacheSets     ('{2}),
+    .ICacheWays     ('{2}),
 
     .VMSupport(0),
     .Xdma     ({1'b1, {(NrCores - 1) {1'b0}}}),
@@ -279,6 +279,7 @@ module chimera_cluster
     .meip_i     (meip_i),
     .mtip_i     (mtip_i),
     .msip_i     (msip_i),
+    .mxip_i     ('0), // TODO added in new snitch: CHECK
 
     .hart_base_id_i     (hart_base_id_i),
     .cluster_base_addr_i(cluster_base_addr_i),
@@ -291,7 +292,12 @@ module chimera_cluster
     .wide_in_req_i    ('0),
     .wide_in_resp_o   (),
     .wide_out_req_o   (clu_axi_wide_mst_req),
-    .wide_out_resp_i  (clu_axi_wide_mst_resp)
+    .wide_out_resp_i  (clu_axi_wide_mst_resp),
+
+    .narrow_ext_req_o  (),
+    .narrow_ext_resp_i ('0),
+    .tcdm_ext_req_i    ('0),
+    .tcdm_ext_resp_o   ()
 
   );
 endmodule

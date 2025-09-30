@@ -5,6 +5,8 @@ transcript
 cheshire
 idma
 hyperbus
+.cache
+.vscode
 
 # EMACS
 
@@ -16,6 +18,7 @@ hyperbus
 
 hw/regs/pcr.md
 cheshire
+snitch_cluster
 
 # SW
 
@@ -42,3 +45,4 @@ compile.tcl
 logs
 vsim.wlf
 *.transcript
+*.log

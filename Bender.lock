@@ -17,10 +17,10 @@ packages:
     - obi_peripherals
     - register_interface
   axi:
-    revision: f07498d53ecd5518b277c7d213ec3b71ca4df93c
-    version: 0.39.7
+    revision: 8e04779f341eb2c89412aae92223a292beef487e
+    version: null
     source:
-      Git: https://github.com/pulp-platform/axi.git
+      Git: https://github.com/colluca/axi
     dependencies:
     - common_cells
     - common_verification
@@ -111,8 +111,8 @@ packages:
     - common_cells
     - register_interface
   cluster_icache:
-    revision: 0e1fb6751d9684d968ba7fb40836e6118b448ecd
-    version: 0.1.1
+    revision: 64e21ae455bbdde850c4df13bef86ea55ac42537
+    version: 0.2.0
     source:
       Git: https://github.com/pulp-platform/cluster_icache.git
     dependencies:
@@ -128,10 +128,10 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 9afda9abb565971649c2aa0985639c096f351171
-    version: 1.38.0
+    revision: ce5344d6a1ab313b791c1bea161c1e1052ffe2f0
+    version: null
     source:
-      Git: https://github.com/pulp-platform/common_cells.git
+      Git: https://github.com/pulp-platform/common_cells
     dependencies:
     - common_verification
     - tech_cells_generic
@@ -166,8 +166,31 @@ packages:
       Git: https://github.com/pulp-platform/fpu_div_sqrt_mvp.git
     dependencies:
     - common_cells
+  hci:
+    revision: 6702c6f41d4e649c1b712839b72650c4c89ed103
+    version: null
+    source:
+      Git: https://github.com/Ludi-1/hci.git
+    dependencies:
+    - cluster_interconnect
+    - hwpe-stream
+    - l2_tcdm_hybrid_interco
+  hwpe-ctrl:
+    revision: 634a6797aa67d89c5d9b290b2cb47dadc53ebd8d
+    version: null
+    source:
+      Git: https://github.com/Ludi-1/hwpe-ctrl.git
+    dependencies:
+    - tech_cells_generic
+  hwpe-stream:
+    revision: 58939cf19e8c13b5afdac399f0f4b29d07353086
+    version: null
+    source:
+      Git: https://github.com/pulp-platform/hwpe-stream.git
+    dependencies:
+    - tech_cells_generic
   hyperbus:
-    revision: 841deb9d821b63bf05a1c85d3a4746352a8bcae2
+    revision: 6410314320b201eb61161802f21bdb5a27a165f7
     version: null
     source:
       Git: https://github.com/pulp-platform/hyperbus.git
@@ -177,7 +200,7 @@ packages:
     - register_interface
     - tech_cells_generic
   idma:
-    revision: 9edf489f57389dce5e71252c79e337f527d3aded
+    revision: 7829f71691a62c1e2e5e3230f370f222c7a83087
     version: null
     source:
       Git: https://github.com/pulp-platform/iDMA.git
@@ -197,6 +220,12 @@ packages:
     - axi
     - common_cells
     - register_interface
+  l2_tcdm_hybrid_interco:
+    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
+    version: 1.0.0
+    source:
+      Git: https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git
+    dependencies: []
   memory_island:
     revision: 64828cb7a9ccc1f1656ec92d06129072f445c319
     version: null
@@ -208,6 +237,18 @@ packages:
     - common_cells
     - common_verification
     - tech_cells_generic
+  mx-ita:
+    revision: null
+    version: null
+    source:
+      Path: ../snitch_cluster/../mx-ita
+    dependencies:
+    - common_cells
+    - fpnew
+    - hci
+    - hwpe-ctrl
+    - hwpe-stream
+    - scm
   obi:
     revision: 0155fc34e900c7c884e081c0a1114a247937ff69
     version: 0.1.7
@@ -234,8 +275,8 @@ packages:
     - register_interface
     - tech_cells_generic
   register_interface:
-    revision: 5daa85d164cf6b54ad061ea1e4c6f3624556e467
-    version: 0.4.5
+    revision: 8e8c209ea559d3b54f45cf30fcce95ce70ff5e49
+    version: 0.4.6
     source:
       Git: https://github.com/pulp-platform/register_interface.git
     dependencies:
@@ -268,23 +309,24 @@ packages:
     - common_cells
     - register_interface
   snitch_cluster:
-    revision: c12ce9b2af1ac8edf3d4feb18939e1ad20c42225
+    revision: null
     version: null
     source:
-      Git: https://github.com/pulp-platform/snitch_cluster.git
+      Path: ../snitch_cluster
     dependencies:
+    - apb
     - axi
     - axi_riscv_atomics
     - cluster_icache
     - common_cells
     - fpnew
     - idma
-    - register_interface
+    - mx-ita
     - riscv-dbg
     - tech_cells_generic
   tech_cells_generic:
-    revision: 7968dd6e6180df2c644636bc6d2908a49f2190cf
-    version: 0.2.13
+    revision: a9cae21902e75b1434328ecf36f85327ba5717de
+    version: 0.2.11
     source:
       Git: https://github.com/pulp-platform/tech_cells_generic.git
     dependencies:
