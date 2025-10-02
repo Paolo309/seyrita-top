@@ -175,7 +175,7 @@ module chimera_clu_domain
     end : gen_no_cluster_iso
 
     if (ChimeraClusterCfg.ClusterType[extClusterIdx] == SNITCH) begin : gen_cluster_type
-      cluster_tile i_cluster_tile (
+      mxita_cluster i_mxita_cluster (
         .clk_i (clu_clk_i[extClusterIdx]),
         .rst_ni (rst_ni[extClusterIdx]),
         .debug_req_i (debug_req_i[`PREVNRCORES(extClusterIdx)+:`NRCORES(extClusterIdx)]),

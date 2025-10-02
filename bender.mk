@@ -6,6 +6,6 @@
 # Lorenzo Leone <lleone@iis.ee.ethz.ch>
 
 COMMON_TARGS ?=
-COMMON_TARGS += -t snitch_cluster -t cv32a6_convolve -t cva6 -t rtl -t snitch_cluster_wrapper -t hwpe
+COMMON_TARGS += -t snitch_cluster -t cv32a6_convolve -t cva6 -t rtl -t snitch_cluster_wrapper -t hwpe -t mxita_cluster
 
 SIM_TARGS = $(COMMON_TARGS) -t test -t sim
