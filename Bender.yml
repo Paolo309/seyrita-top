@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: SHL-0.51
 
 package:
-  name: chimera
+  name: seyrita-top
   authors:
     - "Moritz Scherer <scheremo@iis.ee.ethz.ch>"
     - "Lorenzo Leone <lleone@iis.ee.ethz.ch>"
