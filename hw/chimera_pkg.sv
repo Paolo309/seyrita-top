@@ -83,7 +83,7 @@ package chimera_pkg;
 
   // SCHEREMO: Shared Snitch bootrom, one clock gate per cluster, External regs (PADs, FLLs etc...)
   localparam int ExtRegNum = SnitchBootROM + TopLevelCfgRegs + ExtCfgRegs + HyperCfgRegs;
-  localparam int ClusterDataWidth = 64;
+  localparam int ClusterDataWidth = 32; // TODO this (32) is temporary to avoid placing the adapter: should it be 64 instead?
 
   localparam byte_bt SnitchBootROMIdx = 8'h0;
   localparam doub_bt SnitchBootROMRegionStart = 64'h3000_0000;
@@ -173,7 +173,7 @@ ExtClusters
     // AXI CFG
     cfg.AxiMstIdWidth = 2;
     cfg.AxiDataWidth = 32;
-    cfg.AddrWidth = 32;
+    cfg.AddrWidth = 48; // FIXME is 48 OK? It was 32 in Chimera, but it would cause fatal errors in idma_inst64_top
     cfg.LlcOutRegionEnd = 'hFFFF_FFFF;
 
     cfg.AxiExtNumWideMst = $countones(ChimeraClusterCfg.hasWideMasterPort);
