@@ -4,6 +4,7 @@
 //
 // Viviane Potocnik <vivianep@iis.ee.ethz.ch>
 
+#include <offload.h>
 #include <soc_addr_map.h>
 #include <stdint.h>
 
@@ -22,7 +23,6 @@ int main() {
     // setupInterruptHandler(clusterTrapHandler);
 
     volatile uint8_t *clockGatingRegPtr = (volatile uint8_t *)SOC_CTRL_BASE;
-    setAllClusterClockGating(clockGatingRegPtr, 0);
 
     setClusterReset(clockGatingRegPtr, 2, 0);
     setClusterClockGating(clockGatingRegPtr, 2, 0);
