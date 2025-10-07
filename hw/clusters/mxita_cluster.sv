@@ -1,0 +1,399 @@
+// Copyright 2025 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+//
+// Author: Tim Fischer <fischeti@iis.ee.ethz.ch>
+
+`include "axi/assign.svh"
+`include "axi/typedef.svh"
+`include "tcdm_interface/typedef.svh"
+
+module mxita_cluster
+  import snitch_cluster_pkg::*;
+#(
+  parameter int unsigned NrCores,
+
+  parameter type addr_t            = logic,
+  parameter type narrow_in_req_t   = logic,
+  parameter type narrow_in_resp_t  = logic,
+  parameter type narrow_out_req_t  = logic,
+  parameter type narrow_out_resp_t = logic,
+  parameter type wide_out_req_t    = logic,
+  parameter type wide_out_resp_t   = logic,
+
+  parameter int unsigned ClusterDataWidth,
+  parameter int unsigned chs_AxiUserWidth,
+  parameter int unsigned chs_AddrWidth,
+  parameter int unsigned chs_AxiExtNumWideMst,
+  parameter int unsigned ClusterNarrowAxiMstIdWidth,
+  parameter int unsigned MemIslRegionStart,
+  parameter int unsigned MemIslRegionEnd,
+  parameter int unsigned SnitchBootROMRegionStart
+) (
+  input logic soc_clk_i,
+  input logic clu_clk_i,
+  input logic rst_ni,
+  input logic widemem_bypass_i,
+
+  // Cluster ports
+  input logic [NrCores-1:0] debug_req_i,
+  input logic [NrCores-1:0] meip_i,
+  input logic [NrCores-1:0] mtip_i,
+  input logic [NrCores-1:0] msip_i,
+  input logic [9:0] hart_base_id_i,
+  input logic [chs_AddrWidth-1:0] cluster_base_addr_i,
+  input narrow_in_req_t cluster_narrow_in_req_i,
+  output narrow_in_resp_t cluster_narrow_in_resp_o,
+  output narrow_out_req_t [1:0] cluster_narrow_out_req_o,
+  input narrow_out_resp_t [1:0] cluster_narrow_out_resp_i,
+  output wide_out_req_t cluster_wide_out_req_o,
+  input wide_out_resp_t cluster_wide_out_resp_i,
+  input  snitch_cluster_pkg::wide_in_req_t                      cluster_wide_in_req_i, // TODO make independent from snitch_cluster_pkg
+  output snitch_cluster_pkg::wide_in_resp_t                     cluster_wide_in_resp_o // TODO make independent from snitch_cluster_pkg
+);
+
+  localparam int WideDataWidth = $bits(cluster_wide_out_req_o.w.data);
+
+  localparam int WideMasterIdWidth = $bits(cluster_wide_out_req_o.aw.id);
+  localparam int WideSlaveIdWidth = WideMasterIdWidth + $clog2(chs_AxiExtNumWideMst) - 1;
+
+  typedef logic [chs_AddrWidth-1:0] axi_addr_t;
+  typedef logic [chs_AxiUserWidth-1:0] axi_user_t;
+
+  typedef logic [ClusterDataWidth-1:0] axi_cluster_data_narrow_t;
+  typedef logic [ClusterDataWidth/8-1:0] axi_cluster_strb_narrow_t;
+
+  typedef logic [WideDataWidth-1:0] axi_cluster_data_wide_t;
+  typedef logic [WideDataWidth/8-1:0] axi_cluster_strb_wide_t;
+
+  typedef logic [ClusterNarrowAxiMstIdWidth-1:0] axi_cluster_mst_id_width_narrow_t;
+  typedef logic [ClusterNarrowAxiMstIdWidth-1+2:0] axi_cluster_slv_id_width_narrow_t;
+
+  typedef logic [WideMasterIdWidth-1:0] axi_mst_id_width_wide_t;
+  typedef logic [WideMasterIdWidth-1+2:0] axi_slv_id_width_wide_t;
+
+  `AXI_TYPEDEF_ALL(axi_cluster_out_wide, axi_addr_t, axi_slv_id_width_wide_t,
+                   axi_cluster_data_wide_t, axi_cluster_strb_wide_t, axi_user_t)
+  `AXI_TYPEDEF_ALL(axi_cluster_in_wide, axi_addr_t, axi_mst_id_width_wide_t,
+                   axi_cluster_data_wide_t, axi_cluster_strb_wide_t, axi_user_t)
+
+  `AXI_TYPEDEF_ALL(axi_cluster_out_narrow, axi_addr_t, axi_cluster_slv_id_width_narrow_t,
+                   axi_cluster_data_narrow_t, axi_cluster_strb_narrow_t, axi_user_t)
+  `AXI_TYPEDEF_ALL(axi_cluster_in_narrow, axi_addr_t, axi_cluster_mst_id_width_narrow_t,
+                   axi_cluster_data_narrow_t, axi_cluster_strb_narrow_t, axi_user_t)
+
+  // Cluster-side in- and out- narrow ports used in chimera adapter
+  axi_cluster_in_narrow_req_t   clu_axi_adapter_slv_req;
+  axi_cluster_in_narrow_resp_t  clu_axi_adapter_slv_resp;
+  axi_cluster_out_narrow_req_t  clu_axi_adapter_mst_req;
+  axi_cluster_out_narrow_resp_t clu_axi_adapter_mst_resp;
+
+  // Cluster-side out wide ports
+  axi_cluster_out_wide_req_t    clu_axi_wide_mst_req;
+  axi_cluster_out_wide_resp_t   clu_axi_wide_mst_resp;
+
+  chimera_cluster_adapter #(
+    .WidePassThroughRegionStart(MemIslRegionStart),
+    .WidePassThroughRegionEnd  (MemIslRegionEnd),
+
+    .narrow_in_req_t  (narrow_in_req_t),
+    .narrow_in_resp_t (narrow_in_resp_t),
+    .narrow_out_req_t (narrow_out_req_t),
+    .narrow_out_resp_t(narrow_out_resp_t),
+
+    .clu_narrow_in_req_t  (axi_cluster_in_narrow_req_t),
+    .clu_narrow_in_resp_t (axi_cluster_in_narrow_resp_t),
+    .clu_narrow_out_req_t (axi_cluster_out_narrow_req_t),
+    .clu_narrow_out_resp_t(axi_cluster_out_narrow_resp_t),
+
+    .wide_out_req_t (wide_out_req_t),
+    .wide_out_resp_t(wide_out_resp_t),
+
+    .clu_wide_out_req_t (axi_cluster_out_wide_req_t),
+    .clu_wide_out_resp_t(axi_cluster_out_wide_resp_t)
+
+  ) i_cluster_axi_adapter (
+    .soc_clk_i(soc_clk_i),
+    .clu_clk_i(clu_clk_i),
+    .rst_ni,
+
+    .narrow_in_req_i  (cluster_narrow_in_req_i),
+    .narrow_in_resp_o (cluster_narrow_in_resp_o),
+    .narrow_out_req_o (cluster_narrow_out_req_o),
+    .narrow_out_resp_i(cluster_narrow_out_resp_i),
+
+    .clu_narrow_in_req_o  (clu_axi_adapter_slv_req),
+    .clu_narrow_in_resp_i (clu_axi_adapter_slv_resp),
+    .clu_narrow_out_req_i (clu_axi_adapter_mst_req),
+    .clu_narrow_out_resp_o(clu_axi_adapter_mst_resp),
+
+    .wide_out_req_o     (cluster_wide_out_req_o),
+    .wide_out_resp_i    (cluster_wide_out_resp_i),
+    .clu_wide_out_req_i (clu_axi_wide_mst_req),
+    .clu_wide_out_resp_o(clu_axi_wide_mst_resp),
+
+    .wide_mem_bypass_mode_i(widemem_bypass_i)
+  );
+
+  // -------------------------------
+
+  // Tile-specific reset and clock signals
+  // logic             tile_clk;
+  logic             tile_rst_n;
+
+  ////////////////////
+  // Snitch Cluster //
+  ////////////////////
+
+  localparam int unsigned HWPECtrlAddrWidth = 32;
+  localparam int unsigned HWPECtrlDataWidth = 32;
+  typedef logic [HWPECtrlAddrWidth-1:0] addr_hwpe_ctrl_t;
+  typedef logic [HWPECtrlDataWidth-1:0] data_hwpe_ctrl_t;
+  typedef logic [3:0] strb_hwpe_ctrl_t;
+
+  `AXI_TYPEDEF_ALL(cluster_narrow_out_dw_conv, axi_addr_t, axi_cluster_mst_id_width_narrow_t,
+                   data_hwpe_ctrl_t, strb_hwpe_ctrl_t, axi_user_t)
+
+  cluster_narrow_out_dw_conv_req_t cluster_narrow_out_dw_conv_req, cluster_narrow_out_cut_req;
+  cluster_narrow_out_dw_conv_resp_t cluster_narrow_out_dw_conv_rsp, cluster_narrow_out_cut_rsp;
+
+  `TCDM_TYPEDEF_ALL(hwpectrl, addr_hwpe_ctrl_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t, logic)
+
+  hwpectrl_req_t               hwpectrl_req;
+  hwpectrl_rsp_t               hwpectrl_rsp;
+
+  logic [NrCores-1:0] mxip;
+
+  // Manual instantiation of the snitch cluster
+
+  // ( Solves "Port size (128) does not match connection size (512) for port 'mem_wdata_o'" in snitch_cluster.sv:795
+  // this is because mxita.json has `dma_data_width: 512` (setting WideDataWidth) while Chimera sets WideDataWidth=128
+  // should remove dependency from snitch_cluster_pkg and fully rely on Chimera configuration
+  localparam int unsigned TcdmSize = 128;  // TODO new parameter for Chimera (MXITA sets it to 128)
+  localparam int unsigned TcdmAddrWidth = $clog2(TcdmSize * 1024);
+  typedef logic [WideDataWidth-1:0] data_dma_t;
+  typedef logic [WideDataWidth/8-1:0] strb_dma_t;
+  typedef logic [TcdmAddrWidth-1:0] tcdm_addr_t;
+  `TCDM_TYPEDEF_ALL(tcdm_dma, tcdm_addr_t, data_dma_t, strb_dma_t, logic)
+  // ) // TODO move this fix out of here?
+
+  axi_cluster_out_narrow_req_t  cluster_narrow_ext_req;
+  axi_cluster_out_narrow_resp_t cluster_narrow_ext_rsp;
+  tcdm_dma_req_t                cluster_tcdm_ext_req;
+  tcdm_dma_rsp_t                cluster_tcdm_ext_rsp;
+
+  typedef struct packed {
+    logic [2:0] ema;
+    logic [1:0] emaw;
+    logic [0:0] emas;
+  } sram_cfg_t;
+
+  typedef struct packed {
+    sram_cfg_t icache_tag;
+    sram_cfg_t icache_data;
+    sram_cfg_t tcdm;
+  } sram_cfgs_t;
+
+  localparam int unsigned NumIntOutstandingLoads[NrCores] = '{NrCores{32'h1}};
+  localparam int unsigned NumIntOutstandingMem[NrCores] = '{NrCores{32'h4}};
+
+  snitch_cluster #(
+    .PhysicalAddrWidth(chs_AddrWidth),
+    .NarrowDataWidth  (ClusterDataWidth),
+    .WideDataWidth    (WideDataWidth),
+    .NarrowIdWidthIn  (ClusterNarrowAxiMstIdWidth),
+    .WideIdWidthIn    (WideMasterIdWidth),
+    .NarrowUserWidth  (chs_AxiUserWidth),
+    .WideUserWidth    (chs_AxiUserWidth),
+
+    .narrow_in_req_t  (axi_cluster_in_narrow_req_t),
+    .narrow_in_resp_t (axi_cluster_in_narrow_resp_t),
+    .narrow_out_req_t (axi_cluster_out_narrow_req_t),
+    .narrow_out_resp_t(axi_cluster_out_narrow_resp_t),
+    .wide_out_req_t   (axi_cluster_out_wide_req_t),
+    .wide_out_resp_t  (axi_cluster_out_wide_resp_t),
+    .wide_in_req_t    (snitch_cluster_pkg::wide_in_req_t),
+    .wide_in_resp_t   (snitch_cluster_pkg::wide_in_resp_t),
+    .tcdm_dma_req_t   (tcdm_dma_req_t),
+    .tcdm_dma_rsp_t   (tcdm_dma_rsp_t),
+
+    .BootAddr        (SnitchBootROMRegionStart),
+    .IntBootromEnable(0),
+
+    .NrHives(1),
+    .NrCores(NrCores),
+    .TCDMDepth(1024),
+    .ZeroMemorySize(64),
+    // .ExtMemorySize (0), // not set in Chimera (no ext memory?) // TODO check in old snitch
+    .ClusterPeriphSize(64),
+    .NrBanks(16),
+    .NrHyperBanks(1),
+    .DMANumAxInFlight(3),
+    .DMAReqFifoDepth(3),
+    .ICacheLineWidth('{256}),
+    .ICacheLineCount('{16}),
+    .ICacheWays('{2}),
+    .VMSupport(0),
+    .EnableDMAMulticast(0),  // not set in Chimera (default is zero), but set to 1 by mxita wrapper
+    .Xdma({1'b1, {(NrCores - 1) {1'b0}}}),
+
+    .NumIntOutstandingLoads(NumIntOutstandingLoads),
+    .NumIntOutstandingMem  (NumIntOutstandingMem),
+
+    .RegisterOffloadReq(1),
+    .RegisterOffloadRsp(1),
+    .RegisterCoreReq   (1),
+    .RegisterCoreRsp   (1),
+
+    .sram_cfg_t (sram_cfg_t),
+    .sram_cfgs_t(sram_cfgs_t),
+
+    .CaqDepth         (8),
+    .CaqTagWidth      (16),
+    .DebugSupport     (0)
+  ) i_cluster (
+    .clk_i(clu_clk_i),
+    .rst_ni(rst_ni),
+    .debug_req_i,
+    .meip_i,
+    .mtip_i,
+    .msip_i,
+    .hart_base_id_i      (hart_base_id_i),      // TODO check: in mxita the wrapper was connecting it to snitch_cluster_pkg::CfgBaseHartId
+    .cluster_base_addr_i (cluster_base_addr_i), // TODO check: in mxita the wrapper was connecting it to snitch_cluster_pkg::CfgClusterBaseAddr
+    .mxip_i(mxip),
+    .clk_d2_bypass_i('0),
+    .sram_cfgs_i('0),
+
+    .narrow_in_req_i  (clu_axi_adapter_slv_req),   // chimney? 
+    .narrow_in_resp_o (clu_axi_adapter_slv_resp),  // chimney?
+    .narrow_out_req_o (clu_axi_adapter_mst_req),   // chimney?
+    .narrow_out_resp_i(clu_axi_adapter_mst_resp),  // chimney?
+
+    .wide_out_req_o (clu_axi_wide_mst_req),   // chimney?
+    .wide_out_resp_i(clu_axi_wide_mst_resp),  // chimney?
+    .wide_in_req_i  (cluster_wide_in_req_i),  // chimney?
+    .wide_in_resp_o (cluster_wide_in_resp_o), // chimney?
+
+    // temporary as mxita is currently commented out
+    // .narrow_ext_req_o (),
+    // .narrow_ext_resp_i('0),
+    // .tcdm_ext_req_i   ('0),
+    // .tcdm_ext_resp_o  ()
+
+    .narrow_ext_req_o (cluster_narrow_ext_req), // AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE (FROM snitch_cluster_pkg::narrow_out_req_t TO axi_cluster_out_narrow_req_t)
+    .narrow_ext_resp_i(cluster_narrow_ext_rsp), // AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
+    .tcdm_ext_req_i(cluster_tcdm_ext_req),  // to HWPE
+    .tcdm_ext_resp_o(cluster_tcdm_ext_rsp)  // to HWPE
+  );
+
+
+  // Convert narrow AXI's 64 bit DW down to 32
+  axi_dw_converter #(
+    .AxiMaxReads        (1),
+    .AxiSlvPortDataWidth(ClusterDataWidth),
+    .AxiMstPortDataWidth(HWPECtrlDataWidth),
+    .AxiAddrWidth       (chs_AddrWidth),
+    .AxiIdWidth         (ClusterNarrowAxiMstIdWidth),
+    .aw_chan_t          (axi_cluster_out_narrow_aw_chan_t),
+    .mst_w_chan_t       (cluster_narrow_out_dw_conv_w_chan_t),
+    .slv_w_chan_t       (axi_cluster_out_narrow_w_chan_t),
+    .b_chan_t           (axi_cluster_out_narrow_b_chan_t),
+    .ar_chan_t          (axi_cluster_out_narrow_ar_chan_t),
+    .mst_r_chan_t       (cluster_narrow_out_dw_conv_r_chan_t),
+    .slv_r_chan_t       (axi_cluster_out_narrow_r_chan_t),
+    .axi_mst_req_t      (cluster_narrow_out_dw_conv_req_t),
+    .axi_mst_resp_t     (cluster_narrow_out_dw_conv_resp_t),
+    .axi_slv_req_t      (axi_cluster_out_narrow_req_t),
+    .axi_slv_resp_t     (axi_cluster_out_narrow_resp_t)
+  ) i_axi_dw_hwpe (
+    .clk_i     (clu_clk_i),
+    .rst_ni    (rst_ni),
+    .slv_req_i (cluster_narrow_ext_req),
+    .slv_resp_o(cluster_narrow_ext_rsp),
+    .mst_req_o (cluster_narrow_out_dw_conv_req),
+    .mst_resp_i(cluster_narrow_out_dw_conv_rsp)
+  );
+
+  axi_cut #(
+    .Bypass    (0),
+    .aw_chan_t (cluster_narrow_out_dw_conv_aw_chan_t), // TODO compare with mxita
+    .w_chan_t  (cluster_narrow_out_dw_conv_w_chan_t),
+    .b_chan_t  (cluster_narrow_out_dw_conv_b_chan_t), // TODO compare with mxita
+    .ar_chan_t (cluster_narrow_out_dw_conv_ar_chan_t), // TODO compare with mxita
+    .r_chan_t  (cluster_narrow_out_dw_conv_r_chan_t),
+    .axi_req_t (cluster_narrow_out_dw_conv_req_t),
+    .axi_resp_t(cluster_narrow_out_dw_conv_resp_t)
+  ) i_cut_ext_narrow_slv (
+    .clk_i     (clu_clk_i),
+    .rst_ni    (rst_ni),
+    .slv_req_i (cluster_narrow_out_dw_conv_req),
+    .slv_resp_o(cluster_narrow_out_dw_conv_rsp),
+    .mst_req_o (cluster_narrow_out_cut_req),
+    .mst_resp_i(cluster_narrow_out_cut_rsp)
+  );
+
+  axi_to_tcdm #(
+    .axi_req_t (cluster_narrow_out_dw_conv_req_t),
+    .axi_rsp_t (cluster_narrow_out_dw_conv_resp_t),
+    .tcdm_req_t(hwpectrl_req_t),
+    .tcdm_rsp_t(hwpectrl_rsp_t),
+    .IdWidth   (ClusterNarrowAxiMstIdWidth),
+    .AddrWidth (HWPECtrlAddrWidth),
+    .DataWidth (HWPECtrlDataWidth)
+  ) i_axi_to_hwpe_ctrl (
+    .clk_i     (clu_clk_i),
+    .rst_ni    (rst_ni),
+    .axi_req_i (cluster_narrow_out_cut_req),
+    .axi_rsp_o (cluster_narrow_out_cut_rsp),
+    .tcdm_req_o(hwpectrl_req),
+    .tcdm_rsp_i(hwpectrl_rsp)
+  );
+
+
+  snitch_hwpe_subsystem #(
+    .tcdm_req_t   (tcdm_dma_req_t),
+    .tcdm_rsp_t   (tcdm_dma_rsp_t),
+    .periph_req_t (hwpectrl_req_t),
+    .periph_rsp_t (hwpectrl_rsp_t),
+    .HwpeDataWidth(WideDataWidth),
+    .IdWidth      (ClusterNarrowAxiMstIdWidth),
+    .NrCores      (NrCores),
+    .TCDMDataWidth(ClusterDataWidth)
+  ) i_snitch_hwpe_subsystem (
+    .clk_i          (clu_clk_i),
+    .rst_ni         (rst_ni),
+    .test_mode_i    (1'b0),
+    .tcdm_req_o     (cluster_tcdm_ext_req),
+    .tcdm_rsp_i     (cluster_tcdm_ext_rsp),
+    .hwpe_ctrl_req_i(hwpectrl_req),
+    .hwpe_ctrl_rsp_o(hwpectrl_rsp),
+    .hwpe_evt_o     (mxip)
+  );
+
+  //////////////////////////
+  // Clock Gating & Reset //
+  //////////////////////////
+
+  /*
+  tc_clk_gating i_tc_clk_gating_cluster (
+    .clk_i,
+    .en_i     (tile_clk_en_i),
+    .test_en_i(clk_rst_bypass_i),
+    .clk_o    (tile_clk)
+  );
+
+`ifdef TARGET_XILINX
+  // Using clk cells makes Vivado flag the reset as a clock tree
+  assign tile_rst_n = (clk_rst_bypass_i) ? rst_ni : tile_rst_ni;
+`else
+  tc_clk_mux2 i_tc_reset_mux (
+    .clk0_i   (tile_rst_ni),
+    .clk1_i   (rst_ni),
+    .clk_sel_i(clk_rst_bypass_i),
+    .clk_o    (tile_rst_n)
+  );
+`endif
+*/
+
+
+endmodule
