@@ -9,56 +9,66 @@
 `include "tcdm_interface/typedef.svh"
 
 module mxita_cluster
-  import snitch_cluster_pkg::*;
+  import chimera_pkg::*;
+  import cheshire_pkg::*;
 #(
-  parameter int unsigned NrCores,
+  parameter chimera_cfg_t Cfg = '0,
 
-  parameter type addr_t            = logic,
+  parameter int unsigned NrCores = 9,
+
   parameter type narrow_in_req_t   = logic,
   parameter type narrow_in_resp_t  = logic,
   parameter type narrow_out_req_t  = logic,
   parameter type narrow_out_resp_t = logic,
   parameter type wide_out_req_t    = logic,
-  parameter type wide_out_resp_t   = logic,
-
-  parameter int unsigned ClusterDataWidth,
-  parameter int unsigned chs_AxiUserWidth,
-  parameter int unsigned chs_AddrWidth,
-  parameter int unsigned chs_AxiExtNumWideMst,
-  parameter int unsigned ClusterNarrowAxiMstIdWidth,
-  parameter int unsigned MemIslRegionStart,
-  parameter int unsigned MemIslRegionEnd,
-  parameter int unsigned SnitchBootROMRegionStart
+  parameter type wide_out_resp_t   = logic
 ) (
-  input logic soc_clk_i,
-  input logic clu_clk_i,
-  input logic rst_ni,
-  input logic widemem_bypass_i,
-
-  // Cluster ports
-  input logic [NrCores-1:0] debug_req_i,
-  input logic [NrCores-1:0] meip_i,
-  input logic [NrCores-1:0] mtip_i,
-  input logic [NrCores-1:0] msip_i,
-  input logic [9:0] hart_base_id_i,
-  input logic [chs_AddrWidth-1:0] cluster_base_addr_i,
-  input narrow_in_req_t cluster_narrow_in_req_i,
-  output narrow_in_resp_t cluster_narrow_in_resp_o,
-  output narrow_out_req_t [1:0] cluster_narrow_out_req_o,
-  input narrow_out_resp_t [1:0] cluster_narrow_out_resp_i,
-  output wide_out_req_t cluster_wide_out_req_o,
-  input wide_out_resp_t cluster_wide_out_resp_i,
-  input  snitch_cluster_pkg::wide_in_req_t                      cluster_wide_in_req_i, // TODO make independent from snitch_cluster_pkg
-  output snitch_cluster_pkg::wide_in_resp_t                     cluster_wide_in_resp_o // TODO make independent from snitch_cluster_pkg
+  input  logic                                        soc_clk_i,
+  input  logic                                        clu_clk_i,
+  input  logic                                        rst_ni,
+  input  logic                                        widemem_bypass_i,
+  //-----------------------------
+  // Interrupt ports
+  //-----------------------------
+  input  logic             [             NrCores-1:0] debug_req_i,
+  input  logic             [             NrCores-1:0] meip_i,
+  input  logic             [             NrCores-1:0] mtip_i,
+  input  logic             [             NrCores-1:0] msip_i,
+  //-----------------------------
+  // Cluster base addressing
+  //-----------------------------
+  input  logic             [                     9:0] hart_base_id_i,
+  input  logic             [Cfg.ChsCfg.AddrWidth-1:0] cluster_base_addr_i,
+  input  logic             [                    31:0] boot_addr_i,
+  //-----------------------------
+  // Narrow AXI ports
+  //-----------------------------
+  input  narrow_in_req_t                              narrow_in_req_i,
+  output narrow_in_resp_t                             narrow_in_resp_o,
+  output narrow_out_req_t  [                     1:0] narrow_out_req_o,
+  input  narrow_out_resp_t [                     1:0] narrow_out_resp_i,
+  //-----------------------------
+  //Wide AXI ports
+  //-----------------------------
+  output wide_out_req_t                               wide_out_req_o,
+  input  wide_out_resp_t                              wide_out_resp_i
+  // input  snitch_cluster_pkg::wide_in_req_t                      cluster_wide_in_req_i,
+  // output snitch_cluster_pkg::wide_in_resp_t                     cluster_wide_in_resp_o
 );
 
-  localparam int WideDataWidth = $bits(cluster_wide_out_req_o.w.data);
+  localparam int WideDataWidth = $bits(wide_out_req_o.w.data);
 
-  localparam int WideMasterIdWidth = $bits(cluster_wide_out_req_o.aw.id);
-  localparam int WideSlaveIdWidth = WideMasterIdWidth + $clog2(chs_AxiExtNumWideMst) - 1;
+  localparam int WideMasterIdWidth = $bits(wide_out_req_o.aw.id);
+  localparam int WideSlaveIdWidth = WideMasterIdWidth + $clog2(Cfg.ChsCfg.AxiExtNumWideMst) - 1;
 
-  typedef logic [chs_AddrWidth-1:0] axi_addr_t;
-  typedef logic [chs_AxiUserWidth-1:0] axi_user_t;
+  localparam int NarrowSlaveIdWidth = $bits(narrow_in_req_i.aw.id);
+  localparam int NarrowMasterIdWidth = $bits(narrow_out_req_o[0].aw.id);
+
+  typedef logic [Cfg.ChsCfg.AddrWidth-1:0] axi_addr_t;
+  typedef logic [Cfg.ChsCfg.AxiUserWidth-1:0] axi_user_t;
+
+  typedef logic [Cfg.ChsCfg.AxiDataWidth-1:0] axi_soc_data_narrow_t;
+  typedef logic [Cfg.ChsCfg.AxiDataWidth/8-1:0] axi_soc_strb_narrow_t;
 
   typedef logic [ClusterDataWidth-1:0] axi_cluster_data_narrow_t;
   typedef logic [ClusterDataWidth/8-1:0] axi_cluster_strb_narrow_t;
@@ -69,6 +79,9 @@ module mxita_cluster
   typedef logic [ClusterNarrowAxiMstIdWidth-1:0] axi_cluster_mst_id_width_narrow_t;
   typedef logic [ClusterNarrowAxiMstIdWidth-1+2:0] axi_cluster_slv_id_width_narrow_t;
 
+  typedef logic [NarrowMasterIdWidth-1:0] axi_soc_mst_id_width_narrow_t;
+  typedef logic [NarrowSlaveIdWidth-1:0] axi_soc_slv_id_width_narrow_t;
+
   typedef logic [WideMasterIdWidth-1:0] axi_mst_id_width_wide_t;
   typedef logic [WideMasterIdWidth-1+2:0] axi_slv_id_width_wide_t;
 
@@ -77,9 +90,19 @@ module mxita_cluster
   `AXI_TYPEDEF_ALL(axi_cluster_in_wide, axi_addr_t, axi_mst_id_width_wide_t,
                    axi_cluster_data_wide_t, axi_cluster_strb_wide_t, axi_user_t)
 
+  `AXI_TYPEDEF_ALL(axi_soc_out_narrow, axi_addr_t, axi_soc_slv_id_width_narrow_t,
+                   axi_soc_data_narrow_t, axi_soc_strb_narrow_t, axi_user_t)
+  `AXI_TYPEDEF_ALL(axi_soc_in_narrow, axi_addr_t, axi_soc_mst_id_width_narrow_t,
+                   axi_soc_data_narrow_t, axi_soc_strb_narrow_t, axi_user_t)
+
   `AXI_TYPEDEF_ALL(axi_cluster_out_narrow, axi_addr_t, axi_cluster_slv_id_width_narrow_t,
                    axi_cluster_data_narrow_t, axi_cluster_strb_narrow_t, axi_user_t)
   `AXI_TYPEDEF_ALL(axi_cluster_in_narrow, axi_addr_t, axi_cluster_mst_id_width_narrow_t,
+                   axi_cluster_data_narrow_t, axi_cluster_strb_narrow_t, axi_user_t)
+
+  `AXI_TYPEDEF_ALL(axi_cluster_out_narrow_socIW, axi_addr_t, axi_soc_mst_id_width_narrow_t,
+                   axi_cluster_data_narrow_t, axi_cluster_strb_narrow_t, axi_user_t)
+  `AXI_TYPEDEF_ALL(axi_cluster_in_narrow_socIW, axi_addr_t, axi_soc_slv_id_width_narrow_t,
                    axi_cluster_data_narrow_t, axi_cluster_strb_narrow_t, axi_user_t)
 
   // Cluster-side in- and out- narrow ports used in chimera adapter
@@ -88,18 +111,66 @@ module mxita_cluster
   axi_cluster_out_narrow_req_t  clu_axi_adapter_mst_req;
   axi_cluster_out_narrow_resp_t clu_axi_adapter_mst_resp;
 
+  // Cluster-side in- and out- narrow ports used in narrow adapter
+  axi_cluster_in_narrow_socIW_req_t         clu_axi_narrow_slv_req;
+  axi_cluster_in_narrow_socIW_resp_t        clu_axi_narrow_slv_rsp;
+  axi_cluster_out_narrow_socIW_req_t  [1:0] clu_axi_narrow_mst_req;
+  axi_cluster_out_narrow_socIW_resp_t [1:0] clu_axi_narrow_mst_rsp;
+
   // Cluster-side out wide ports
   axi_cluster_out_wide_req_t    clu_axi_wide_mst_req;
   axi_cluster_out_wide_resp_t   clu_axi_wide_mst_resp;
+ 
+
+  if (ClusterDataWidth != Cfg.ChsCfg.AxiDataWidth) begin : gen_narrow_adapter
+    narrow_adapter #(
+      .narrow_in_req_t  (axi_soc_out_narrow_req_t),
+      .narrow_in_resp_t (axi_soc_out_narrow_resp_t),
+      .narrow_out_req_t (axi_soc_in_narrow_req_t),
+      .narrow_out_resp_t(axi_soc_in_narrow_resp_t),
+
+      .clu_narrow_in_req_t  (axi_cluster_in_narrow_socIW_req_t),
+      .clu_narrow_in_resp_t (axi_cluster_in_narrow_socIW_resp_t),
+      .clu_narrow_out_req_t (axi_cluster_out_narrow_socIW_req_t),
+      .clu_narrow_out_resp_t(axi_cluster_out_narrow_socIW_resp_t),
+
+      .MstPorts(2),
+      .SlvPorts(1)
+
+    ) i_cluster_narrow_adapter (
+      .soc_clk_i(soc_clk_i),
+      .rst_ni,
+
+      // SoC side narrow.
+      .narrow_in_req_i  (narrow_in_req_i),   // <- SoC
+      .narrow_in_resp_o (narrow_in_resp_o),  // -> SoC
+      .narrow_out_req_o (narrow_out_req_o),  // -> SoC
+      .narrow_out_resp_i(narrow_out_resp_i), // <- SoC
+
+      // Cluster side narrow
+      .clu_narrow_in_req_o  (clu_axi_narrow_slv_req),  // -> Chimera adapter
+      .clu_narrow_in_resp_i (clu_axi_narrow_slv_rsp),  // <- Chimera adapter
+      .clu_narrow_out_req_i (clu_axi_narrow_mst_req),  // <- Chimera adapter
+      .clu_narrow_out_resp_o(clu_axi_narrow_mst_rsp)   // -> Chimera adapter
+
+    );
+
+  end else begin : gen_skip_narrow_adapter  // if (ClusterDataWidth != Cfg.AxiDataWidth)
+    assign clu_axi_narrow_slv_req = narrow_in_req_i;
+    assign narrow_in_resp_o       = clu_axi_narrow_slv_rsp;
+    assign narrow_out_req_o       = clu_axi_narrow_mst_req;
+    assign clu_axi_narrow_mst_rsp = narrow_out_resp_i;
+
+  end
 
   chimera_cluster_adapter #(
-    .WidePassThroughRegionStart(MemIslRegionStart),
-    .WidePassThroughRegionEnd  (MemIslRegionEnd),
+    .WidePassThroughRegionStart(Cfg.MemIslRegionStart),
+    .WidePassThroughRegionEnd  (Cfg.MemIslRegionEnd),
 
-    .narrow_in_req_t  (narrow_in_req_t),
-    .narrow_in_resp_t (narrow_in_resp_t),
-    .narrow_out_req_t (narrow_out_req_t),
-    .narrow_out_resp_t(narrow_out_resp_t),
+    .narrow_in_req_t  (axi_cluster_in_narrow_socIW_req_t),
+    .narrow_in_resp_t (axi_cluster_in_narrow_socIW_resp_t),
+    .narrow_out_req_t (axi_cluster_out_narrow_socIW_req_t),
+    .narrow_out_resp_t(axi_cluster_out_narrow_socIW_resp_t),
 
     .clu_narrow_in_req_t  (axi_cluster_in_narrow_req_t),
     .clu_narrow_in_resp_t (axi_cluster_in_narrow_resp_t),
@@ -117,70 +188,28 @@ module mxita_cluster
     .clu_clk_i(clu_clk_i),
     .rst_ni,
 
-    .narrow_in_req_i  (cluster_narrow_in_req_i),
-    .narrow_in_resp_o (cluster_narrow_in_resp_o),
-    .narrow_out_req_o (cluster_narrow_out_req_o),
-    .narrow_out_resp_i(cluster_narrow_out_resp_i),
+    // SoC side narrow (narrow adapter side)
+    .narrow_in_req_i  (clu_axi_narrow_slv_req),  // <- narrow adapter
+    .narrow_in_resp_o (clu_axi_narrow_slv_rsp),  // -> narrow adapter
+    .narrow_out_req_o (clu_axi_narrow_mst_req),  // -> narrow adapter
+    .narrow_out_resp_i(clu_axi_narrow_mst_rsp),  // <- narrow adapter
 
-    .clu_narrow_in_req_o  (clu_axi_adapter_slv_req),
-    .clu_narrow_in_resp_i (clu_axi_adapter_slv_resp),
-    .clu_narrow_out_req_i (clu_axi_adapter_mst_req),
-    .clu_narrow_out_resp_o(clu_axi_adapter_mst_resp),
+    // Cluster side narrow
+    .clu_narrow_in_req_o  (clu_axi_adapter_slv_req),   // -> cluster
+    .clu_narrow_in_resp_i (clu_axi_adapter_slv_resp),  // <- cluster
+    .clu_narrow_out_req_i (clu_axi_adapter_mst_req),   // <- cluster
+    .clu_narrow_out_resp_o(clu_axi_adapter_mst_resp),  // -> cluster
 
-    .wide_out_req_o     (cluster_wide_out_req_o),
-    .wide_out_resp_i    (cluster_wide_out_resp_i),
-    .clu_wide_out_req_i (clu_axi_wide_mst_req),
-    .clu_wide_out_resp_o(clu_axi_wide_mst_resp),
+    // SoC side wide
+    .wide_out_req_o (wide_out_req_o),  // -> SoC
+    .wide_out_resp_i(wide_out_resp_i), // <- SoC 
+
+    // Cluster side wide
+    .clu_wide_out_req_i (clu_axi_wide_mst_req),  // <- cluster
+    .clu_wide_out_resp_o(clu_axi_wide_mst_resp), // -> cluster
 
     .wide_mem_bypass_mode_i(widemem_bypass_i)
   );
-
-  // -------------------------------
-
-  // Tile-specific reset and clock signals
-  // logic             tile_clk;
-  logic             tile_rst_n;
-
-  ////////////////////
-  // Snitch Cluster //
-  ////////////////////
-
-  localparam int unsigned HWPECtrlAddrWidth = 32;
-  localparam int unsigned HWPECtrlDataWidth = 32;
-  typedef logic [HWPECtrlAddrWidth-1:0] addr_hwpe_ctrl_t;
-  typedef logic [HWPECtrlDataWidth-1:0] data_hwpe_ctrl_t;
-  typedef logic [3:0] strb_hwpe_ctrl_t;
-
-  `AXI_TYPEDEF_ALL(cluster_narrow_out_dw_conv, axi_addr_t, axi_cluster_mst_id_width_narrow_t,
-                   data_hwpe_ctrl_t, strb_hwpe_ctrl_t, axi_user_t)
-
-  cluster_narrow_out_dw_conv_req_t cluster_narrow_out_dw_conv_req, cluster_narrow_out_cut_req;
-  cluster_narrow_out_dw_conv_resp_t cluster_narrow_out_dw_conv_rsp, cluster_narrow_out_cut_rsp;
-
-  `TCDM_TYPEDEF_ALL(hwpectrl, addr_hwpe_ctrl_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t, logic)
-
-  hwpectrl_req_t               hwpectrl_req;
-  hwpectrl_rsp_t               hwpectrl_rsp;
-
-  logic [NrCores-1:0] mxip;
-
-  // Manual instantiation of the snitch cluster
-
-  // ( Solves "Port size (128) does not match connection size (512) for port 'mem_wdata_o'" in snitch_cluster.sv:795
-  // this is because mxita.json has `dma_data_width: 512` (setting WideDataWidth) while Chimera sets WideDataWidth=128
-  // should remove dependency from snitch_cluster_pkg and fully rely on Chimera configuration
-  localparam int unsigned TcdmSize = 128;  // TODO new parameter for Chimera (MXITA sets it to 128)
-  localparam int unsigned TcdmAddrWidth = $clog2(TcdmSize * 1024);
-  typedef logic [WideDataWidth-1:0] data_dma_t;
-  typedef logic [WideDataWidth/8-1:0] strb_dma_t;
-  typedef logic [TcdmAddrWidth-1:0] tcdm_addr_t;
-  `TCDM_TYPEDEF_ALL(tcdm_dma, tcdm_addr_t, data_dma_t, strb_dma_t, logic)
-  // ) // TODO move this fix out of here?
-
-  axi_cluster_out_narrow_req_t  cluster_narrow_ext_req;
-  axi_cluster_out_narrow_resp_t cluster_narrow_ext_rsp;
-  tcdm_dma_req_t                cluster_tcdm_ext_req;
-  tcdm_dma_rsp_t                cluster_tcdm_ext_rsp;
 
   typedef struct packed {
     logic [2:0] ema;
@@ -197,23 +226,56 @@ module mxita_cluster
   localparam int unsigned NumIntOutstandingLoads[NrCores] = '{NrCores{32'h1}};
   localparam int unsigned NumIntOutstandingMem[NrCores] = '{NrCores{32'h4}};
 
+  // TODO move into chimera_pkg?
+  localparam int unsigned TcdmSize = 128;  // TODO new parameter for Chimera (MXITA sets it to 128)
+  localparam int unsigned TcdmAddrWidth = $clog2(TcdmSize * 1024);
+  typedef logic [WideDataWidth-1:0] data_dma_t;
+  typedef logic [WideDataWidth/8-1:0] strb_dma_t;
+  typedef logic [TcdmAddrWidth-1:0] tcdm_addr_t;
+  `TCDM_TYPEDEF_ALL(tcdm_dma, tcdm_addr_t, data_dma_t, strb_dma_t, logic)
+
+  axi_cluster_out_narrow_req_t  cluster_narrow_ext_req;
+  axi_cluster_out_narrow_resp_t cluster_narrow_ext_rsp;
+  tcdm_dma_req_t                cluster_tcdm_ext_req;
+  tcdm_dma_rsp_t                cluster_tcdm_ext_rsp;
+
+  localparam int unsigned HWPECtrlAddrWidth = 32;
+  localparam int unsigned HWPECtrlDataWidth = 32;
+  typedef logic [HWPECtrlAddrWidth-1:0] addr_hwpe_ctrl_t;
+  typedef logic [HWPECtrlDataWidth-1:0] data_hwpe_ctrl_t;
+  typedef logic [3:0] strb_hwpe_ctrl_t;
+
+  `AXI_TYPEDEF_ALL(cluster_narrow_out_dw_conv, snitch_cluster_pkg::addr_t,
+                   snitch_cluster_pkg::narrow_out_id_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t,
+                   snitch_cluster_pkg::user_t)
+
+  cluster_narrow_out_dw_conv_req_t cluster_narrow_out_dw_conv_req, cluster_narrow_out_cut_req;
+  cluster_narrow_out_dw_conv_resp_t cluster_narrow_out_dw_conv_rsp, cluster_narrow_out_cut_rsp;
+
+  `TCDM_TYPEDEF_ALL(hwpectrl, addr_hwpe_ctrl_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t, logic)
+
+  hwpectrl_req_t               hwpectrl_req;
+  hwpectrl_rsp_t               hwpectrl_rsp;
+
+  logic          [NrCores-1:0] mxip;
+
   snitch_cluster #(
-    .PhysicalAddrWidth(chs_AddrWidth),
+    .PhysicalAddrWidth(Cfg.ChsCfg.AddrWidth),
     .NarrowDataWidth  (ClusterDataWidth),
     .WideDataWidth    (WideDataWidth),
     .NarrowIdWidthIn  (ClusterNarrowAxiMstIdWidth),
     .WideIdWidthIn    (WideMasterIdWidth),
-    .NarrowUserWidth  (chs_AxiUserWidth),
-    .WideUserWidth    (chs_AxiUserWidth),
+    .NarrowUserWidth  (Cfg.ChsCfg.AxiUserWidth),
+    .WideUserWidth    (Cfg.ChsCfg.AxiUserWidth),
 
-    .narrow_in_req_t  (axi_cluster_in_narrow_req_t),
-    .narrow_in_resp_t (axi_cluster_in_narrow_resp_t),
+    .narrow_in_req_t (axi_cluster_in_narrow_req_t),
+    .narrow_in_resp_t(axi_cluster_in_narrow_resp_t),
     .narrow_out_req_t (axi_cluster_out_narrow_req_t),
     .narrow_out_resp_t(axi_cluster_out_narrow_resp_t),
     .wide_out_req_t   (axi_cluster_out_wide_req_t),
     .wide_out_resp_t  (axi_cluster_out_wide_resp_t),
-    .wide_in_req_t    (snitch_cluster_pkg::wide_in_req_t),
-    .wide_in_resp_t   (snitch_cluster_pkg::wide_in_resp_t),
+    .wide_in_req_t   (axi_cluster_in_wide_req_t),
+    .wide_in_resp_t  (axi_cluster_in_wide_resp_t),
     .tcdm_dma_req_t   (tcdm_dma_req_t),
     .tcdm_dma_rsp_t   (tcdm_dma_rsp_t),
 
@@ -248,42 +310,39 @@ module mxita_cluster
     .sram_cfg_t (sram_cfg_t),
     .sram_cfgs_t(sram_cfgs_t),
 
-    .CaqDepth         (8),
-    .CaqTagWidth      (16),
-    .DebugSupport     (0)
-  ) i_cluster (
-    .clk_i(clu_clk_i),
-    .rst_ni(rst_ni),
-    .debug_req_i,
-    .meip_i,
-    .mtip_i,
-    .msip_i,
-    .hart_base_id_i      (hart_base_id_i),      // TODO check: in mxita the wrapper was connecting it to snitch_cluster_pkg::CfgBaseHartId
-    .cluster_base_addr_i (cluster_base_addr_i), // TODO check: in mxita the wrapper was connecting it to snitch_cluster_pkg::CfgClusterBaseAddr
-    .mxip_i(mxip),
+    .RegisterExtWide  ('0),
+    .RegisterExtNarrow('0)
+  ) i_test_cluster (
+
+    .clk_i          (clu_clk_i),
     .clk_d2_bypass_i('0),
-    .sram_cfgs_i('0),
+    .rst_ni,
 
-    .narrow_in_req_i  (clu_axi_adapter_slv_req),   // chimney? 
-    .narrow_in_resp_o (clu_axi_adapter_slv_resp),  // chimney?
-    .narrow_out_req_o (clu_axi_adapter_mst_req),   // chimney?
-    .narrow_out_resp_i(clu_axi_adapter_mst_resp),  // chimney?
+    .debug_req_i(debug_req_i),
+    .meip_i     (meip_i),
+    .mtip_i     (mtip_i),
+    .msip_i     (msip_i),
+    .mxip_i     (mxip),         // TODO added in new snitch: CHECK
 
-    .wide_out_req_o (clu_axi_wide_mst_req),   // chimney?
-    .wide_out_resp_i(clu_axi_wide_mst_resp),  // chimney?
-    .wide_in_req_i  (cluster_wide_in_req_i),  // chimney?
-    .wide_in_resp_o (cluster_wide_in_resp_o), // chimney?
+    .hart_base_id_i     (hart_base_id_i),
+    .cluster_base_addr_i(cluster_base_addr_i),
+    .sram_cfgs_i        ('0),
 
-    // temporary as mxita is currently commented out
-    // .narrow_ext_req_o (),
-    // .narrow_ext_resp_i('0),
-    // .tcdm_ext_req_i   ('0),
-    // .tcdm_ext_resp_o  ()
+    .narrow_in_req_i  (clu_axi_adapter_slv_req),   // <- chimera adapter
+    .narrow_in_resp_o (clu_axi_adapter_slv_resp),  // -> chimera adapter
+    .narrow_out_req_o (clu_axi_adapter_mst_req),   // -> chimera adapter
+    .narrow_out_resp_i(clu_axi_adapter_mst_resp),  // <- chimera adapter
 
-    .narrow_ext_req_o (cluster_narrow_ext_req), // AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE (FROM snitch_cluster_pkg::narrow_out_req_t TO axi_cluster_out_narrow_req_t)
-    .narrow_ext_resp_i(cluster_narrow_ext_rsp), // AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
-    .tcdm_ext_req_i(cluster_tcdm_ext_req),  // to HWPE
-    .tcdm_ext_resp_o(cluster_tcdm_ext_rsp)  // to HWPE
+    .wide_in_req_i    ('0),
+    .wide_in_resp_o   (),
+    .wide_out_req_o   (clu_axi_wide_mst_req),      // -> chimera adapter
+    .wide_out_resp_i  (clu_axi_wide_mst_resp),     // <- chimera adapter
+
+    .narrow_ext_req_o  (cluster_narrow_ext_req), // -> AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
+    .narrow_ext_resp_i (cluster_narrow_ext_rsp), // -> AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
+    .tcdm_ext_req_i(cluster_tcdm_ext_req),  // -> HWPE
+    .tcdm_ext_resp_o(cluster_tcdm_ext_rsp)  // -> HWPE
+
   );
 
 
@@ -292,8 +351,8 @@ module mxita_cluster
     .AxiMaxReads        (1),
     .AxiSlvPortDataWidth(ClusterDataWidth),
     .AxiMstPortDataWidth(HWPECtrlDataWidth),
-    .AxiAddrWidth       (chs_AddrWidth),
-    .AxiIdWidth         (ClusterNarrowAxiMstIdWidth),
+    .AxiAddrWidth       (Cfg.ChsCfg.AxiDataWidth),
+    .AxiIdWidth         (ClusterNarrowAxiMstIdWidth + 2),  // TODO move definition somewhere else?
     .aw_chan_t          (axi_cluster_out_narrow_aw_chan_t),
     .mst_w_chan_t       (cluster_narrow_out_dw_conv_w_chan_t),
     .slv_w_chan_t       (axi_cluster_out_narrow_w_chan_t),
@@ -358,7 +417,7 @@ module mxita_cluster
     .HwpeDataWidth(WideDataWidth),
     .IdWidth      (ClusterNarrowAxiMstIdWidth),
     .NrCores      (NrCores),
-    .TCDMDataWidth(ClusterDataWidth)
+    .TCDMDataWidth(WideDataWidth)
   ) i_snitch_hwpe_subsystem (
     .clk_i          (clu_clk_i),
     .rst_ni         (rst_ni),

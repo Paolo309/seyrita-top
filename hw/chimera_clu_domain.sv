@@ -176,24 +176,15 @@ module chimera_clu_domain
 
     if (ChimeraClusterCfg.ClusterType[extClusterIdx] == SNITCH) begin : gen_cluster_type
       mxita_cluster #(
-        .NrCores(`NRCORES(extClusterIdx)),
-
+        .Cfg              (Cfg),
+        .NrCores          (`NRCORES(extClusterIdx)),
         .narrow_in_req_t  (narrow_in_req_t),
         .narrow_in_resp_t (narrow_in_resp_t),
         .narrow_out_req_t (narrow_out_req_t),
         .narrow_out_resp_t(narrow_out_resp_t),
         .wide_out_req_t   (wide_out_req_t),
-        .wide_out_resp_t  (wide_out_resp_t),
-
-        .ClusterDataWidth          (ClusterDataWidth),
-        .chs_AxiUserWidth          (Cfg.ChsCfg.AxiUserWidth),
-        .chs_AddrWidth             (Cfg.ChsCfg.AddrWidth),
-        .chs_AxiExtNumWideMst      (Cfg.ChsCfg.AxiExtNumWideMst),
-        .MemIslRegionStart         (Cfg.MemIslRegionStart),
-        .MemIslRegionEnd           (Cfg.MemIslRegionEnd),
-        .ClusterNarrowAxiMstIdWidth(ClusterNarrowAxiMstIdWidth),
-        .SnitchBootROMRegionStart  (SnitchBootROMRegionStart)
-      ) i_mxita_cluster (
+        .wide_out_resp_t  (wide_out_resp_t)
+      ) i_chimera_cluster (
         .soc_clk_i(soc_clk_i),
         .clu_clk_i(clu_clk_i[extClusterIdx]),
         .rst_ni(rst_ni[extClusterIdx]),
@@ -204,14 +195,17 @@ module chimera_clu_domain
         .msip_i(msip_i[`PREVNRCORES(extClusterIdx)+:`NRCORES(extClusterIdx)]),
         .hart_base_id_i(10'(`PREVNRCORES(extClusterIdx) + 1)),
         .cluster_base_addr_i(Cfg.ChsCfg.AxiExtRegionStart[extClusterIdx][Cfg.ChsCfg.AddrWidth-1:0]),
-        .cluster_narrow_in_req_i(narrow_in_isolated_req[extClusterIdx]),
-        .cluster_narrow_in_resp_o(narrow_in_isolated_resp[extClusterIdx]),
-        .cluster_narrow_out_req_o(narrow_out_isolated_req[2*extClusterIdx+:2]),
-        .cluster_narrow_out_resp_i(narrow_out_isolated_resp[2*extClusterIdx+:2]),
-        .cluster_wide_out_req_o(wide_out_isolated_req[extClusterIdx]),
-        .cluster_wide_out_resp_i(wide_out_isolated_resp[extClusterIdx]),
-        .cluster_wide_in_req_i('0),  // Not used
-        .cluster_wide_in_resp_o()  // Not used
+        .boot_addr_i(boot_addr_i),
+
+        .narrow_in_req_i  (narrow_in_isolated_req[extClusterIdx]),
+        .narrow_in_resp_o (narrow_in_isolated_resp[extClusterIdx]),
+        .narrow_out_req_o (narrow_out_isolated_req[2*extClusterIdx+:2]),
+        .narrow_out_resp_i(narrow_out_isolated_resp[2*extClusterIdx+:2]),
+
+        .wide_out_req_o (wide_out_isolated_req[extClusterIdx]),
+        .wide_out_resp_i(wide_out_isolated_resp[extClusterIdx])
+        // .cluster_wide_in_req_i('0),  // Not used
+        // .cluster_wide_in_resp_o()  // Not used
       );
     end
 
