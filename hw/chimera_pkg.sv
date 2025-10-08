@@ -120,7 +120,7 @@ ExtClusters
     64'h40A0_0000, 64'h4080_0000, 64'h4060_0000, 64'h4040_0000, 64'h4020_0000
   };
 
-  localparam aw_bt ClusterNarrowAxiMstIdWidth = 2; // for MXITA integration
+  localparam aw_bt ClusterNarrowAxiMstIdWidth = 1;
 
   // Memory Island
   localparam byte_bt MemIslandIdx = ClusterIdx[ExtClusters-1] + 1;
@@ -128,7 +128,7 @@ ExtClusters
   localparam doub_bt MemIslRegionEnd = 64'h4804_0000;
 
   localparam aw_bt MemIslAxiMstIdWidth = 1;
-  localparam byte_bt MemIslNarrowToWideFactor = 16; // MXITA needs WideDataWidth=512 
+  localparam byte_bt MemIslNarrowToWideFactor = 4;
   localparam byte_bt MemIslNarrowPorts = 1;
   localparam byte_bt MemIslWidePorts = $countones(ChimeraClusterCfg.hasWideMasterPort);
   localparam byte_bt MemIslNumWideBanks = 2;
@@ -173,7 +173,7 @@ ExtClusters
     // AXI CFG
     cfg.AxiMstIdWidth = 2;
     cfg.AxiDataWidth = 32;
-    cfg.AddrWidth = 48; // FIXME is 48 OK? It was 32 in Chimera, but it would cause fatal errors in idma_inst64_top
+    cfg.AddrWidth = 48; // MXITA: new Snitch doesn't work with 32
     cfg.LlcOutRegionEnd = 'hFFFF_FFFF;
 
     cfg.AxiExtNumWideMst = $countones(ChimeraClusterCfg.hasWideMasterPort);
@@ -205,8 +205,6 @@ ExtClusters
     cfg.NumExtIrqHarts = ExtCores;
     cfg.NumExtDbgHarts = ExtCores;
     cfg.NumExtOutIntrTgts = ExtCores;
-    // MXITA CFG
-    cfg.AxiUserWidth = 53; // for MXITA integration
 
     chimera_cfg = '{
         ChsCfg                    : cfg,
