@@ -9,7 +9,7 @@ module tb_chimera_soc
   import cheshire_pkg::*;
 #(
   /// The selected simulation configuration from the `tb_chimera_pkg`.
-  parameter int unsigned SelectedCfg = 32'd0
+  parameter int unsigned SelectedCfg = 32'd2
 );
 
   fixture_chimera_soc #(.SelectedCfg(SelectedCfg)) fix ();

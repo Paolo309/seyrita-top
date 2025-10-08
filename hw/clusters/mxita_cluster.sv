@@ -226,9 +226,6 @@ module mxita_cluster
   localparam int unsigned NumIntOutstandingLoads[NrCores] = '{NrCores{32'h1}};
   localparam int unsigned NumIntOutstandingMem[NrCores] = '{NrCores{32'h4}};
 
-  // TODO move into chimera_pkg?
-  localparam int unsigned TcdmSize = 128;  // TODO new parameter for Chimera (MXITA sets it to 128)
-  localparam int unsigned TcdmAddrWidth = $clog2(TcdmSize * 1024);
   typedef logic [WideDataWidth-1:0] data_dma_t;
   typedef logic [WideDataWidth/8-1:0] strb_dma_t;
   typedef logic [TcdmAddrWidth-1:0] tcdm_addr_t;

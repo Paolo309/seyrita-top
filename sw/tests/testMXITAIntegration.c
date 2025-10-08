@@ -24,19 +24,29 @@ int main() {
 
     volatile uint8_t *clockGatingRegPtr = (volatile uint8_t *)SOC_CTRL_BASE;
 
+    // test read-write access to cluster 2 (Snitch)
     setClusterReset(clockGatingRegPtr, 2, 0);
     setClusterClockGating(clockGatingRegPtr, 2, 0);
-
+    
     volatile uint8_t *cluPtr_0 = (volatile uint8_t *)CLUSTER_2_BASE;
     *cluPtr_0 = 0x2A;
     volatile uint8_t result_0 = *cluPtr_0;
 
-    volatile uint32_t *cluPtr_1 = (volatile uint32_t *)CLUSTER_2_BASE;
+    setClusterClockGating(clockGatingRegPtr, 2, 1);
+    setClusterReset(clockGatingRegPtr, 2, 0);
+
+    // test read-write access to cluster 4 (MXITA)
+    int cluster_idx = 4; // cluster 4 is MXITA, while 0-3 are Snitch
+
+    setClusterReset(clockGatingRegPtr, cluster_idx, 0);
+    setClusterClockGating(clockGatingRegPtr, cluster_idx, 0);
+
+    volatile uint32_t *cluPtr_1 = (volatile uint32_t *)CLUSTER_4_BASE;
     *cluPtr_1 = 0xDEADBEEF;
     volatile uint32_t result_1 = *cluPtr_1;
 
-    setClusterClockGating(clockGatingRegPtr, 2, 1);
-    setClusterReset(clockGatingRegPtr, 2, 0);
+    setClusterClockGating(clockGatingRegPtr, cluster_idx, 1);
+    setClusterReset(clockGatingRegPtr, cluster_idx, 0);
 
     uint32_t ret_code = 0;
     ret_code |= (result_0 != 0x2A);

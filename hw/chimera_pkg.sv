@@ -17,7 +17,7 @@ package chimera_pkg;
   typedef bit [63:0] doub_bt;
   typedef bit [15:0] shrt_bt;
 
-  typedef enum logic [0:0] {SNITCH} cluster_type_e;
+  typedef enum logic [0:0] {SNITCH, MXITA} cluster_type_e;
 
   // --------------------------
   // | Cluster domain config  |
@@ -40,7 +40,7 @@ package chimera_pkg;
   localparam cluster_config_t ChimeraClusterCfg = '{
       hasWideMasterPort: {1'b1, 1'b1, 1'b1, 1'b1, 1'b1},
       NrCores: {8'h9, 8'h9, 8'h9, 8'h9, 8'h9},
-      ClusterType: {SNITCH, SNITCH, SNITCH, SNITCH, SNITCH}
+      ClusterType: {SNITCH, SNITCH, SNITCH, SNITCH, MXITA}
   };
 
   function automatic int _sumVector(byte_bt [iomsb(ExtClusters):0] vector, int vectorLen);
@@ -120,7 +120,7 @@ ExtClusters
     64'h40A0_0000, 64'h4080_0000, 64'h4060_0000, 64'h4040_0000, 64'h4020_0000
   };
 
-  localparam aw_bt ClusterNarrowAxiMstIdWidth = 1;
+  localparam aw_bt ClusterNarrowAxiMstIdWidth = 2; // MXITA needs 2 bits here
 
   // Memory Island
   localparam byte_bt MemIslandIdx = ClusterIdx[ExtClusters-1] + 1;
@@ -145,6 +145,12 @@ ExtClusters
 
   localparam int unsigned LogDepth = 3;
   localparam int unsigned SyncStages = 3;
+
+  // ------------
+  // |   TCDM   |
+  // ------------
+  localparam doub_bt TcdmSize = 128;
+  localparam aw_bt TcdmAddrWidth = $clog2(TcdmSize * 1024);
 
   // -------------------
   // |   Generate Cfg   |
@@ -231,9 +237,20 @@ ExtClusters
     return chimera_cfg;
   endfunction : gen_chimera_cfg_isolate
 
-  localparam int unsigned NumCfgs = 2;
+  function automatic chimera_cfg_t gen_mxita_cfg();
+    chimera_cfg_t chimera_cfg;
+    chimera_cfg = gen_chimera_cfg();
+    
+    chimera_cfg.MemIslNarrowToWideFactor = 16;
+    chimera_cfg.ChsCfg.AxiUserWidth = 53;
+
+    return chimera_cfg;
+  endfunction : gen_mxita_cfg
+
+  localparam int unsigned NumCfgs = 3;
 
   localparam chimera_cfg_t [NumCfgs-1:0] ChimeraCfg = {
+    gen_mxita_cfg(),  // 2: MXITA configuration
     gen_chimera_cfg_isolate(),  // 1: Configuration with Isolation for Power Managemenet
     gen_chimera_cfg()  // 0: Default configuration
   };
