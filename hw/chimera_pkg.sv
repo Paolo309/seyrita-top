@@ -242,7 +242,6 @@ ExtClusters
     chimera_cfg = gen_chimera_cfg();
     
     chimera_cfg.MemIslNarrowToWideFactor = 16;
-    chimera_cfg.ChsCfg.AxiUserWidth = 53;
 
     return chimera_cfg;
   endfunction : gen_mxita_cfg
