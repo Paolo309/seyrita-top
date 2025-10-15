@@ -57,6 +57,10 @@ sources:
       - target/sim/src/vip_chimera_soc.sv
       - target/sim/src/fixture_chimera_soc.sv
       - target/sim/src/tb_chimera_soc.sv
+  
+  - target: all(fpga, xilinx)
+    files:
+      - target/xilinx/src/chimera_top_xilinx.sv
 
 vendor_package:
   - name: reggen
