@@ -58,9 +58,8 @@ module chimera_clu_domain
   // Axi parameters
   localparam int unsigned AxiWideDataWidth = Cfg.ChsCfg.AxiDataWidth * Cfg.MemIslNarrowToWideFactor;
   localparam int unsigned AxiWideSlvIdWidth = Cfg.MemIslAxiMstIdWidth + $clog2(Cfg.MemIslWidePorts);
-  localparam int unsigned AxiSlvIdWidth = Cfg.ChsCfg.AxiMstIdWidth + $clog2(
-      cheshire_pkg::gen_axi_in(Cfg.ChsCfg).num_in
-  );
+  localparam cheshire_pkg::axi_in_t TmpAxiIn = cheshire_pkg::gen_axi_in(Cfg.ChsCfg);
+  localparam int unsigned AxiSlvIdWidth = Cfg.ChsCfg.AxiMstIdWidth + $clog2(TmpAxiIn.num_in);
 
   // Isolated AXI signals
   narrow_in_req_t   [    iomsb(Cfg.ChsCfg.AxiExtNumSlv):0] narrow_in_isolated_req;
