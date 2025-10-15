@@ -242,9 +242,10 @@ module mxita_cluster
   typedef logic [HWPECtrlDataWidth-1:0] data_hwpe_ctrl_t;
   typedef logic [3:0] strb_hwpe_ctrl_t;
 
-  `AXI_TYPEDEF_ALL(cluster_narrow_out_dw_conv, snitch_cluster_pkg::addr_t,
+  // TODO remove snitch_cluster_pkg::narrow_out_id_t with Chimera defined one
+  `AXI_TYPEDEF_ALL(cluster_narrow_out_dw_conv, axi_addr_t,
                    snitch_cluster_pkg::narrow_out_id_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t,
-                   snitch_cluster_pkg::user_t)
+                   axi_user_t)
 
   cluster_narrow_out_dw_conv_req_t cluster_narrow_out_dw_conv_req, cluster_narrow_out_cut_req;
   cluster_narrow_out_dw_conv_resp_t cluster_narrow_out_dw_conv_rsp, cluster_narrow_out_cut_rsp;
