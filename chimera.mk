@@ -87,6 +87,30 @@ chim-nonfree-init:
 TB_DUT = tb_chimera_soc
 -include $(CHIM_ROOT)/target/sim/sim.mk
 
+###############
+# CHIMERA-SDK #
+###############
+CHIM_SDK_TARGET ?= chimera-mxita
+
+$(CHISDK_ROOT)/deeploy_devel.sif:
+	@echo "Pulling DeEploy Singularity image. This may take a while..."
+	cd $(CHISDK_ROOT) && \
+	SINGULARITY_CACHEDIR=$(SINGULARITY_CACHE_DIR) singularity pull docker:ghcr.io/pulp-platform/deeploy:devel
+
+$(CHISDK_ROOT)/build: $(CHISDK_ROOT)/deeploy_devel.sif
+	cd $(CHISDK_ROOT) && \
+	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D SIMULATION_BACKEND=RTL -B build"
+
+chim-sdk: $(CHISDK_ROOT)/build
+	cd $(CHISDK_ROOT) && \
+	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake --build build -j"
+	@echo "Binaries for target '$(CHIM_SDK_TARGET)' are available in '$(CHISDK_ROOT)/build/bin'"
+
+clean-chim-sdk:
+	rm -rf $(CHISDK_ROOT)/build
+
+.PHONY: chim-sdk
+
 #################################
 # Phonies for the entire system #
 #################################

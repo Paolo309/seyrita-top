@@ -26,6 +26,7 @@ CHS_ROOT    ?= .
 SNITCH_ROOT ?= .
 IDMA_ROOT   ?= .
 HYPERB_ROOT ?= .
+CHISDK_ROOT ?= ../chimera-sdk # TODO get it from bender or submodule
 
 # Bender prerequisites
 BENDER_YML = $(CHIM_ROOT)/Bender.yml
@@ -45,6 +46,7 @@ CHIM_SW_DIR ?= $(CHIM_ROOT)/sw
 ########
 BASE_PYTHON ?= python
 PIP_CACHE_DIR ?= $(CHIM_ROOT)/.cache/pip
+SINGULARITY_CACHE_DIR ?= $(CHIM_ROOT)/.cache/singularity
 
 .PHONY: dvt-flist pythomn-venv python-venv-clean
 
