@@ -133,6 +133,8 @@ ExtClusters
   localparam byte_bt MemIslWidePorts = $countones(ChimeraClusterCfg.hasWideMasterPort);
   localparam byte_bt MemIslNumWideBanks = 2;
   localparam shrt_bt MemIslWordsPerBank = 1024;
+  // Size of memory island: MemIslNumWideBanks * MemIslWordsPerBank * MemIslNarrowToWideFactor * <bytes per word>
+  // bytes per word is cfg.AxiDataWidth / 8
 
   // Hyperbus
   localparam byte_bt HyperbusIdx = MemIslandIdx + 1;
@@ -240,8 +242,10 @@ ExtClusters
   function automatic chimera_cfg_t gen_mxita_cfg();
     chimera_cfg_t chimera_cfg;
     chimera_cfg = gen_chimera_cfg();
-    
+
+    // Memory Island size: 2 banks x 1024 words x 16 (narrow to wide) x 4 bytes = 128KB
     chimera_cfg.MemIslNarrowToWideFactor = 16;
+
     chimera_cfg.ChsCfg.AxiUserWidth = 4;
 
     return chimera_cfg;
