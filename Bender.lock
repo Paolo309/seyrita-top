@@ -167,14 +167,17 @@ packages:
     dependencies:
     - common_cells
   hci:
-    revision: 6702c6f41d4e649c1b712839b72650c4c89ed103
+    revision: fd5c1247b48d02d20d6e8ec734c70a7bad0373fd
     version: null
     source:
-      Git: https://github.com/Ludi-1/hci.git
+      Git: https://github.com/pulp-platform/hci.git
     dependencies:
     - cluster_interconnect
+    - common_cells
     - hwpe-stream
     - l2_tcdm_hybrid_interco
+    - redundancy_cells
+    - register_interface
   hwpe-ctrl:
     revision: 634a6797aa67d89c5d9b290b2cb47dadc53ebd8d
     version: null
@@ -183,7 +186,7 @@ packages:
     dependencies:
     - tech_cells_generic
   hwpe-stream:
-    revision: 58939cf19e8c13b5afdac399f0f4b29d07353086
+    revision: 1b87f50d2b2a8b365e851ed52eebb07676f3b106
     version: null
     source:
       Git: https://github.com/pulp-platform/hwpe-stream.git
@@ -238,10 +241,10 @@ packages:
     - common_verification
     - tech_cells_generic
   mx-ita:
-    revision: null
+    revision: e5c197e8dc556d726bb9b781aa07d209488bfecf
     version: null
     source:
-      Path: ../snitch_cluster/../mx-ita
+      Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/mx-ita.git
     dependencies:
     - common_cells
     - fpnew
@@ -272,6 +275,16 @@ packages:
       Git: https://github.com/pulp-platform/opentitan_peripherals.git
     dependencies:
     - common_cells
+    - register_interface
+    - tech_cells_generic
+  redundancy_cells:
+    revision: c37bdb47339bf70e8323de8df14ea8bbeafb6583
+    version: null
+    source:
+      Git: https://github.com/pulp-platform/redundancy_cells.git
+    dependencies:
+    - common_cells
+    - common_verification
     - register_interface
     - tech_cells_generic
   register_interface:
