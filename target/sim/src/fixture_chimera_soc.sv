@@ -133,7 +133,9 @@ module fixture_chimera_soc #(
     .pmu_rst_clusters_ni      ({ExtClusters{rst_n}}),
     .pmu_clkgate_en_clusters_i(),
     .pmu_iso_en_clusters_i    ('0),                    // Never Isolate
-    .pmu_iso_ack_clusters_o   ()
+    .pmu_iso_ack_clusters_o   (),
+    .apb_req_o                (),
+    .apb_rsp_i                ('0)
   );
 
   ////////////////////////
