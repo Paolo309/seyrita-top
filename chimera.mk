@@ -90,7 +90,8 @@ TB_DUT = tb_chimera_soc
 ###############
 # CHIMERA-SDK #
 ###############
-CHIM_SDK_TARGET ?= chimera-mxita
+CHIM_SDK_TARGET ?= chimera-open
+CHISDK_ROOT = ../chimera-sdk
 
 $(CHISDK_ROOT)/deeploy_devel.sif:
 	@echo "Pulling DeEploy Singularity image. This may take a while..."
@@ -99,7 +100,7 @@ $(CHISDK_ROOT)/deeploy_devel.sif:
 
 $(CHISDK_ROOT)/build: $(CHISDK_ROOT)/deeploy_devel.sif
 	cd $(CHISDK_ROOT) && \
-	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D SIMULATION_BACKEND=RTL -B build"
+	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D HARDWARE_BACKEND=RTL -B build"
 
 chim-sdk: $(CHISDK_ROOT)/build
 	cd $(CHISDK_ROOT) && \
@@ -107,7 +108,8 @@ chim-sdk: $(CHISDK_ROOT)/build
 	@echo "Binaries for target '$(CHIM_SDK_TARGET)' are available in '$(CHISDK_ROOT)/build/bin'"
 
 clean-chim-sdk:
-	rm -rf $(CHISDK_ROOT)/build
+	cd $(CHISDK_ROOT) && \
+	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake --build build -t clean"
 
 .PHONY: chim-sdk
 
