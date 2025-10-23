@@ -4,5 +4,4 @@
 #
 # Moritz Scherer <scheremo@iis.ee.ethz.ch>
 
-set BINARY ../../../sw/tests/testCluster.memisl.elf
-set SELCFG 0
+set SELCFG 2
