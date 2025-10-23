@@ -250,7 +250,7 @@ module mxita_cluster
   cluster_narrow_out_dw_conv_req_t cluster_narrow_out_dw_conv_req, cluster_narrow_out_cut_req;
   cluster_narrow_out_dw_conv_resp_t cluster_narrow_out_dw_conv_rsp, cluster_narrow_out_cut_rsp;
 
-  `TCDM_TYPEDEF_ALL(hwpectrl, addr_hwpe_ctrl_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t, logic)
+  `TCDM_TYPEDEF_ALL(hwpectrl, addr_hwpe_ctrl_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t, axi_user_t)
 
   hwpectrl_req_t               hwpectrl_req;
   hwpectrl_rsp_t               hwpectrl_rsp;
@@ -390,6 +390,7 @@ module mxita_cluster
   );
 
   axi_to_tcdm #(
+    .user_t (axi_user_t),
     .axi_req_t (cluster_narrow_out_dw_conv_req_t),
     .axi_rsp_t (cluster_narrow_out_dw_conv_resp_t),
     .tcdm_req_t(hwpectrl_req_t),
