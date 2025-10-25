@@ -241,10 +241,11 @@ module mxita_cluster
   typedef logic [HWPECtrlAddrWidth-1:0] addr_hwpe_ctrl_t;
   typedef logic [HWPECtrlDataWidth-1:0] data_hwpe_ctrl_t;
   typedef logic [3:0] strb_hwpe_ctrl_t;
+  typedef logic [ClusterNarrowAxiMstIdWidth+2-1:0] narrow_out_id_t;
 
   // TODO remove snitch_cluster_pkg::narrow_out_id_t with Chimera defined one
   `AXI_TYPEDEF_ALL(cluster_narrow_out_dw_conv, axi_addr_t,
-                   snitch_cluster_pkg::narrow_out_id_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t,
+                   narrow_out_id_t, data_hwpe_ctrl_t, strb_hwpe_ctrl_t,
                    axi_user_t)
 
   cluster_narrow_out_dw_conv_req_t cluster_narrow_out_dw_conv_req, cluster_narrow_out_cut_req;
@@ -350,7 +351,7 @@ module mxita_cluster
     .AxiSlvPortDataWidth(ClusterDataWidth),
     .AxiMstPortDataWidth(HWPECtrlDataWidth),
     .AxiAddrWidth       (Cfg.ChsCfg.AxiDataWidth),
-    .AxiIdWidth         (ClusterNarrowAxiMstIdWidth + 2),  // TODO move definition somewhere else?
+    .AxiIdWidth         (ClusterNarrowAxiMstIdWidth+2),
     .aw_chan_t          (axi_cluster_out_narrow_aw_chan_t),
     .mst_w_chan_t       (cluster_narrow_out_dw_conv_w_chan_t),
     .slv_w_chan_t       (axi_cluster_out_narrow_w_chan_t),
@@ -395,7 +396,7 @@ module mxita_cluster
     .axi_rsp_t (cluster_narrow_out_dw_conv_resp_t),
     .tcdm_req_t(hwpectrl_req_t),
     .tcdm_rsp_t(hwpectrl_rsp_t),
-    .IdWidth   (ClusterNarrowAxiMstIdWidth),
+    .IdWidth   (ClusterNarrowAxiMstIdWidth+2),
     .AddrWidth (HWPECtrlAddrWidth),
     .DataWidth (HWPECtrlDataWidth)
   ) i_axi_to_hwpe_ctrl (
@@ -414,7 +415,7 @@ module mxita_cluster
     .periph_req_t (hwpectrl_req_t),
     .periph_rsp_t (hwpectrl_rsp_t),
     .HwpeDataWidth(WideDataWidth),
-    .IdWidth      (ClusterNarrowAxiMstIdWidth),
+    .IdWidth      (ClusterNarrowAxiMstIdWidth+2),
     .NrCores      (NrCores),
     .TCDMDataWidth(WideDataWidth)
   ) i_snitch_hwpe_subsystem (
