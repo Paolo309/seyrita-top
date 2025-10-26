@@ -417,7 +417,7 @@ module mxita_cluster
     .HwpeDataWidth(WideDataWidth),
     .IdWidth      (ClusterNarrowAxiMstIdWidth+2),
     .NrCores      (NrCores),
-    .TCDMDataWidth(WideDataWidth)
+    .TCDMDataWidth(ClusterDataWidth)
   ) i_snitch_hwpe_subsystem (
     .clk_i          (clu_clk_i),
     .rst_ni         (rst_ni),
