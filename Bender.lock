@@ -71,10 +71,10 @@ packages:
     - common_cells
     - register_interface
   cheshire:
-    revision: 586cb0225be5c57f5ffcf67bd490763efd9b4d24
+    revision: b8ce9d2c8a80b7047af21937a20a5468b9ff088b
     version: null
     source:
-      Git: https://github.com/pulp-platform/cheshire.git
+      Git: https://github.com/Paolo309/cheshire.git
     dependencies:
     - apb_uart
     - axi
