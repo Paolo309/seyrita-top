@@ -90,7 +90,7 @@ TB_DUT = tb_chimera_soc
 ###############
 # CHIMERA-SDK #
 ###############
-CHIM_SDK_TARGET ?= chimera-open
+CHIM_SDK_TARGET ?= chimera-mxita
 CHISDK_ROOT = ../chimera-sdk
 
 $(CHISDK_ROOT)/deeploy_devel.sif:
