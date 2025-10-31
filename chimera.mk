@@ -113,6 +113,35 @@ clean-chim-sdk:
 
 .PHONY: chim-sdk
 
+MXITA_SW_INCLUDE_PATH := $(abspath $(CHISDK_ROOT))/tests/mxita/app/include/
+MXITA_SIMVECTORS_PATH := $(abspath $(CHIM_ROOT))/simvectors
+MXITA_PARAMS_PY := $(MXITA_ROOT)/PyMXITA/params.py
+MXITA_DATAGEN_PY := $(MXITA_ROOT)/PyMXITA/main.py
+
+gen-mxita-data:
+	@echo "[MXITA] Setting HEADER_PATH to $(MXITA_SW_INCLUDE_PATH) in $(MXITA_PARAMS_PY)"
+	@sed -i 's|^HEADER_PATH = .*|HEADER_PATH = "$(MXITA_SW_INCLUDE_PATH)"|' $(MXITA_PARAMS_PY)
+	@if [ ! -z "$(M)" ]; then \
+		echo "[MXITA] Setting M to $(M) in params.py"; \
+		sed -i 's|^M = .*|M = $(M)|' $(MXITA_PARAMS_PY); \
+	fi
+	@if [ ! -z "$(N)" ]; then \
+		echo "[MXITA] Setting N to $(N) in params.py"; \
+		sed -i 's|^N = .*|N = $(N)|' $(MXITA_PARAMS_PY); \
+	fi
+	@if [ ! -z "$(P)" ]; then \
+		echo "[MXITA] Setting P to $(P) in params.py"; \
+		sed -i 's|^P = .*|P = $(P)|' $(MXITA_PARAMS_PY); \
+	fi
+	@if [ ! -z "$(Q)" ]; then \
+		echo "[MXITA] Setting Q to $(Q) in params.py"; \
+		sed -i 's|^Q = .*|Q = $(Q)|' $(MXITA_PARAMS_PY); \
+	fi
+	@python3 $(MXITA_DATAGEN_PY)
+	@rm -r $(MXITA_SIMVECTORS_PATH)
+
+.PHONY: gen-mxita-data
+
 #################################
 # Phonies for the entire system #
 #################################
