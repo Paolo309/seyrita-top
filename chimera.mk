@@ -6,8 +6,8 @@
 # Lorenzo Leone <lleone@iis.ee.ethz.ch>
 
 
-CLINTCORES = 46
-PLICCORES = 92
+CLINTCORES = 10
+PLICCORES = 20
 PLIC_NUM_INTRS = 32
 
 

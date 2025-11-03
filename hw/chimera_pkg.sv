@@ -23,7 +23,7 @@ package chimera_pkg;
   // | Cluster domain config  |
   // --------------------------
 
-  localparam int ExtClusters = 2;
+  localparam int ExtClusters = 1;
 
   // List of supported clusters type
   typedef struct packed {
@@ -38,9 +38,9 @@ package chimera_pkg;
   //  - The type of cluster to instantiate (make sure the type is defined)
 
   localparam cluster_config_t ChimeraClusterCfg = '{
-      hasWideMasterPort: {1'b1, 1'b1},
-      NrCores: {8'h9, 8'h9},
-      ClusterType: {SNITCH, MXITA}
+      hasWideMasterPort: {1'b1},
+      NrCores: {8'h9},
+      ClusterType: {MXITA}
   };
 
   function automatic int _sumVector(byte_bt [iomsb(ExtClusters):0] vector, int vectorLen);
@@ -108,17 +108,9 @@ package chimera_pkg;
   // --------------------------
 
   // Cluster domain
-  localparam byte_bt [iomsb(ExtClusters):0] ClusterIdx = {8'h1, 8'h0};
-  localparam doub_bt [iomsb(
-ExtClusters
-):0] ClusterRegionStart = {
-    64'h4020_0000, 64'h4000_0000
-  };
-  localparam doub_bt [iomsb(
-ExtClusters
-):0] ClusterRegionEnd = {
-    64'h4040_0000, 64'h4020_0000
-  };
+  localparam byte_bt [iomsb(ExtClusters):0] ClusterIdx = {8'h0};
+  localparam doub_bt [iomsb(ExtClusters):0] ClusterRegionStart = {64'h4000_0000};
+  localparam doub_bt [iomsb(ExtClusters):0] ClusterRegionEnd = {64'h4020_0000};
 
   localparam aw_bt ClusterNarrowAxiMstIdWidth = 2; // MXITA needs 2 bits here
 
