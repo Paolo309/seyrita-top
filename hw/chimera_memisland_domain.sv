@@ -27,7 +27,7 @@ module chimera_memisland_domain
 
   // Define needed parameters
   localparam int unsigned AxiSlvIdWidth = $bits(axi_narrow_req_i.aw.id);
-  localparam int unsigned WideSlaveIdWidth = $clog2(Cfg.MemIslWidePorts);
+  localparam int unsigned WideSlaveIdWidth = $clog2(Cfg.MemIslWidePorts) + 1;
   localparam int unsigned WideDataWidth = Cfg.ChsCfg.AxiDataWidth * Cfg.MemIslNarrowToWideFactor;
 
   axi_narrow_req_t axi_memory_island_amo_req;
