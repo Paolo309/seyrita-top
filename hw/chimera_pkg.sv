@@ -39,7 +39,7 @@ package chimera_pkg;
 
   localparam cluster_config_t ChimeraClusterCfg = '{
       hasWideMasterPort: {1'b1},
-      NrCores: {8'h9},
+      NrCores: {8'h3},
       ClusterType: {MXITA}
   };
 
