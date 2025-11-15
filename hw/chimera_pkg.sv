@@ -166,6 +166,7 @@ package chimera_pkg;
 
     cfg.Vga = 0;
     cfg.SerialLink = 0;
+    cfg.RtcFreq = 1000000; // Hz
     // SCHEREMO: Fully remove LLC
     cfg.LlcNotBypass = 0;
     cfg.LlcOutConnect = 0;
