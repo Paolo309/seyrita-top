@@ -50,9 +50,10 @@ $(CHIM_XILINX_DIR)/build/%/out.xci: \
 # Bitstreams #
 ##############
 
-CHIM_XILINX_BOARDS := vcu118
+CHIM_XILINX_BOARDS := vcu118 vcu128
 
 CHIM_XILINX_IPS_vcu118 := clkwiz vio
+CHIM_XILINX_IPS_vcu128 := clkwiz vio
 
 $(CHIM_XILINX_DIR)/scripts/add_sources.%.tcl: $(CHIM_ROOT)/Bender.yml $(CHIM_XILINX_HW)
 	$(BENDER) script vivado -t fpga -t $* $(CHIM_BENDER_RTL_FLAGS) > $@
@@ -80,27 +81,29 @@ CHIM_XILINX_ALL = $(foreach board,$(CHIM_XILINX_BOARDS),$$(CHIM_XILINX_DIR)/out/
 # Utilities #
 #############
 
-# # Parameters for HW server (defaults are for a unique board @ localhost).
-# # `CHS_XILINX_HWS_PATH_$(board)` overrides the device path for each board (default *).
-# CHS_XILINX_HWS_URL ?= localhost:3121
+# Parameters for HW server (defaults are for a unique board @ localhost).
+# `CHS_XILINX_HWS_PATH_$(board)` overrides the device path for each board (default *).
+CHIM_XILINX_HWS_URL ?= boardberg.ee.ethz.ch:12846
 
-# # We build the dependency file $(2) only if it does not exist; it must not be up to date.
-# # We add PHONYs for each board as despite the implicit rule, these should be explicit.
-# define chs_xilinx_util_rule
-# CHS_PHONY += $(foreach board,$(CHS_XILINX_BOARDS),chs-xilinx-$(1)-$(board))
-# $(foreach board,$(CHS_XILINX_BOARDS),chs-xilinx-$(1)-$(board)): chs-xilinx-$(1)-%: \
-# 		$$(CHS_XILINX_DIR)/scripts/util/$(1).tcl | $$(CHS_XILINX_DIR)/build/%.$(1)/
-# 	[ -e $(subst %,$$*,$(2)) ] || $$(MAKE) $(subst %,$$*,$(2))
-# 	@rm -f $$(CHS_XILINX_DIR)/build/$$(*)*.$(1).log $$(CHS_XILINX_DIR)/build/$$(*)*.$(1).jou
-# 	cd $$| && $$(VIVADO) -mode batch -log ../$$(*).$(1).log -jou ../$$(*).$(1).jou -source $$< \
-# 		-tclargs $$(CHS_XILINX_HWS_URL) $$(or $$(CHS_XILINX_HWS_PATH_$$*),{*}) $$* $(subst %,$$*,$(2)) 0
-# endef
+# We build the dependency file $(2) only if it does not exist; it must not be up to date.
+# We add PHONYs for each board as despite the implicit rule, these should be explicit.
+define chim_xilinx_util_rule
+CHIM_PHONY += $(foreach board,$(CHIM_XILINX_BOARDS),chim-xilinx-$(1)-$(board))
+$(foreach board,$(CHIM_XILINX_BOARDS),chim-xilinx-$(1)-$(board)): chim-xilinx-$(1)-%: \
+		$$(CHIM_XILINX_DIR)/scripts/util/$(1).tcl | $$(CHIM_XILINX_DIR)/build/%.$(1)/
+	[ -e $(subst %,$$*,$(2)) ] || $$(MAKE) $(subst %,$$*,$(2))
+	@rm -f $$(CHIM_XILINX_DIR)/build/$$(*)*.$(1).log $$(CHIM_XILINX_DIR)/build/$$(*)*.$(1).jou
+	cd $$| && $$(VIVADO) -mode $(or $(3) -notrace,batch) -log ../$$(*).$(1).log -jou ../$$(*).$(1).jou -source $$< \
+		-tclargs $$(CHIM_XILINX_HWS_URL) $$(or $$(CHIM_XILINX_HWS_PATH_$$*),{*}) $$* $(subst %,$$*,$(2)) 0
+endef
 
-# # Program bitstream onto board
-# $(eval $(call chs_xilinx_util_rule,program,$(CHS_XILINX_DIR)/out/cheshire.%.bit))
+# Program bitstream onto board
+$(eval $(call chim_xilinx_util_rule,program,$(CHIM_XILINX_DIR)/out/chimera.%.bit))
 
 # # Flash onboard memory with the file `CHS_XILINX_FLASH_IMG` (only selected boards).
 # # `%` is substituted with the board name. The default is the Linux disk image for that board.
 # CHS_XILINX_FLASH_IMG ?= $(CHS_SW_DIR)/boot/linux.%.gpt.bin
 # $(eval $(call chs_xilinx_util_rule,flash,$(CHS_XILINX_FLASH_IMG)))
 
+# Program bitstream onto board
+$(eval $(call chim_xilinx_util_rule,connect,$(CHIM_XILINX_DIR)/out/chimera.%.bit,tcl))

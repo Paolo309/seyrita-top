@@ -6,6 +6,7 @@
 # Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 # Cyril Koenig <cykoenig@iis.ee.ethz.ch>
 # Paul Scheffler <cykoenig@iis.ee.ethz.ch>
+# Paolo Galfano <paologalfano99@gmail.com>
 
 # Initialize implementation
 set xilinx_root [file dirname [file dirname [file normalize [info script]]]]
@@ -29,7 +30,8 @@ update_compile_order -fileset sources_1
 # Set synthesis properties
 # TODO: investigate resource-affordable retiming
 set_property XPM_LIBRARIES XPM_MEMORY [current_project]
-set_property strategy Flow_PerfOptimized_high [get_runs synth_1]
+# XXX Should not be commented (although it might interfere with ILA)
+# set_property strategy Flow_PerfOptimized_high [get_runs synth_1]
 
 # TODO remove
 # set_msg_config -id "Synth 8-524" -new_severity "ERROR"
@@ -50,31 +52,42 @@ open_run synth_1
 # Generate synthesis reports
 gen_reports ${project_root}/reports.synth
 
-# # Instantiate debug core and ILAs
-# # TODO: debug this
-# insert_ilas {soc_clk}
+# Instantiate debug core and ILAs
+insert_ilas {soc_clk}
 
-# # Set implementation properties
+# Set implementation properties
+set_property strategy Performance_Explore [get_runs impl_1]
 # set_property strategy Performance_ExtraTimingOpt [get_runs impl_1]
 
-# # Implementation
-# launch_runs -jobs $num_jobs impl_1 -to_step write_bitstream
-# wait_on_run impl_1
-# open_run impl_1
 
-# # Generate implementation reports
-# gen_reports ${project_root}/reports.impl
+# Floorplanning
 
-# # Check timing constraints
+create_pblock pblock_host
+resize_pblock pblock_host -add SLR1:SLR1
+add_cells_to_pblock pblock_host [get_cells [list i_chimera_soc/i_cheshire]]
+add_cells_to_pblock pblock_host [get_cells [list i_chimera_soc/i_memisland_domain]]
+
+create_pblock pblock_i_cluster_domain
+resize_pblock pblock_i_cluster_domain -add SLR0:SLR0
+add_cells_to_pblock pblock_i_cluster_domain [get_cells [list i_chimera_soc/i_cluster_domain]]
+
+# Implementation
+launch_runs -jobs $num_jobs impl_1 -to_step write_bitstream
+wait_on_run impl_1
+open_run impl_1
+
+# Generate implementation reports
+gen_reports ${project_root}/reports.impl
+# TODO uncomment
 # set trep [report_timing_summary -no_header -no_detailed_paths -return_string]
 # if { ![string match -nocase {*timing constraints are met*} $trep] } {
 #     puts "Error: Timing constraints not met for ${proj} on ${board}."
 #     return -code error
 # }
 
-# # Copy out final bitstream
-# file mkdir ${xilinx_root}/out
-# file copy -force ${project_root}/${proj}.runs/impl_1/cheshire_top_xilinx.bit \
-#     ${xilinx_root}/out/${proj}.${board}.bit
-# file copy -force ${project_root}/${proj}.runs/impl_1/cheshire_top_xilinx.ltx \
-#     ${xilinx_root}/out/${proj}.${board}.ltx
+# Copy out final bitstream
+file mkdir ${xilinx_root}/out
+file copy -force ${project_root}/${proj}.runs/impl_1/chimera_top_xilinx.bit \
+    ${xilinx_root}/out/${proj}.${board}.bit
+file copy -force ${project_root}/${proj}.runs/impl_1/chimera_top_xilinx.ltx \
+    ${xilinx_root}/out/${proj}.${board}.ltx

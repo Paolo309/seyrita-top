@@ -49,6 +49,8 @@ vsim.wlf
 
 # VIVADO
 
-target/xilinx/build
+target/xilinx/build*/
 target/xilinx/scripts/add_sources*.tcl
+*.bit
+*.ltx
 

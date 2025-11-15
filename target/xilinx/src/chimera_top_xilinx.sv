@@ -5,18 +5,21 @@
 
 // Temporary module just to enable synthesis: not tested, likely doesn't work
 
+`include "phy_definitions.svh"
+
 module chimera_top_xilinx (
     input  logic sys_clk_p,
     input  logic sys_clk_n,
 
-    input  logic sys_resetn,
+    input  logic sys_reset,
 
     // JTAG
     input  logic jtag_tck_i,
     input  logic jtag_tms_i,
     input  logic jtag_tdi_i,
     output logic jtag_tdo_o,
-    input  logic jtag_trst_ni,
+    output logic jtag_vdd_o,
+    output logic jtag_gnd_o,
 
     // UART
     output logic uart_tx_o,
@@ -29,8 +32,7 @@ module chimera_top_xilinx (
 
     wire sys_clk;
     wire soc_clk;
-    wire clu_clk;
-    wire locked;
+    // wire clu_clk;
 
     IBUFDS #(
         .IBUF_LOW_PWR ("FALSE")
@@ -42,21 +44,29 @@ module chimera_top_xilinx (
 
     clkwiz i_clkwiz (
         .clk_in1 ( sys_clk ),
-        .reset   ( ~sys_resetn ),
-        .locked  ( locked ),
-        .clk_50( soc_clk ),
-        .clk_48( clu_clk ) // TODO probably should be connected to the same clock?
+        .reset   ( '0 ),
+        .locked  ( ),
+        .clk_50  ( soc_clk ),
+        .clk_48  ( ),
+        .clk_20  ( ),
+        .clk_10  ( )
     );
+
 
     //================================================================
     // VIO (Virtual Input/Output) Reset
     //================================================================
     wire vio_reset;
+    wire sys_rst;
 
     vio i_vio (
         .clk        ( soc_clk ),
         .probe_out0 ( vio_reset )
     );
+
+    assign sys_rst = sys_reset | vio_reset;
+    `ila(sys_reset_btn, sys_reset)
+    `ila(sys_rst_comb, sys_rst)
 
     //================================================================
     // Reset
@@ -65,11 +75,54 @@ module chimera_top_xilinx (
 
     rstgen i_rstgen (
         .clk_i        ( soc_clk ),
-        .rst_ni       ( (sys_resetn & ~vio_reset) & locked ),
+        .rst_ni       ( ~sys_rst ),
         .test_mode_i  ( 1'b0 ),
         .rst_no       ( rst_n ),
         .init_no      ( )
     );
+
+    `ila(rst_n_gen, rst_n)
+
+    ////////////
+    //  JTAG  //
+    ////////////
+
+    assign jtag_vdd_o = 1'b1;
+    assign jtag_gnd_o = 1'b0;
+
+    /////////////////////////
+    // "RTC" Clock Divider //
+    /////////////////////////
+    logic rtc_clk_d, rtc_clk_q;
+    logic [15:0] counter_d, counter_q;
+
+    // Divide soc_clk (50 MHz) by 50 => 1 MHz RTC Clock
+    always_comb begin
+        counter_d = counter_q + 1;
+        rtc_clk_d = rtc_clk_q;
+
+        if(counter_q == 24) begin
+            counter_d = '0;
+            rtc_clk_d = ~rtc_clk_q;
+        end
+    end
+
+    always_ff @(posedge soc_clk, negedge rst_n) begin
+        if(~rst_n) begin
+            counter_q <= '0;
+            rtc_clk_q <= 0;
+        end else begin
+            counter_q <= counter_d;
+            rtc_clk_q <= rtc_clk_d;
+        end
+    end
+
+    // ILAs for JTAG
+
+    `ila(jtag_tck, jtag_tck_i)
+    `ila(jtag_tms, jtag_tms_i)
+    `ila(jtag_tdi, jtag_tdi_i)
+    `ila(jtag_tdo, jtag_tdo_o)
 
     //================================================================
     // Chimera SoC
@@ -79,18 +132,18 @@ module chimera_top_xilinx (
         .SelectedCfg (2) // MXITA config
     ) i_chimera_soc (
         .soc_clk_i   ( soc_clk ),
-        .clu_clk_i   ( clu_clk ),
+        .clu_clk_i   ( soc_clk ),
         .rst_ni      ( rst_n ),
         .test_mode_i ( 1'b0 ),
         .boot_mode_i ( 2'b00 ),
-        .rtc_i       ( 1'b0 ),
+        .rtc_i       ( rtc_clk_q ),
 
         // JTAG
-        .jtag_tck_i    ( jtag_tck_i ),
-        .jtag_trst_ni  ( jtag_trst_ni ),
-        .jtag_tms_i    ( jtag_tms_i ),
-        .jtag_tdi_i    ( jtag_tdi_i ),
-        .jtag_tdo_o    ( jtag_tdo_o ),
+        .jtag_tck_i    ( jtag_tck ),
+        .jtag_trst_ni  ( 1'b1 ),
+        .jtag_tms_i    ( jtag_tms ),
+        .jtag_tdi_i    ( jtag_tdi ),
+        .jtag_tdo_o    ( jtag_tdo ),
         .jtag_tdo_oe_o ( ),
 
         // UART
