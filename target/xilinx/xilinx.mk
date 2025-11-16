@@ -93,7 +93,7 @@ $(foreach board,$(CHIM_XILINX_BOARDS),chim-xilinx-$(1)-$(board)): chim-xilinx-$(
 		$$(CHIM_XILINX_DIR)/scripts/util/$(1).tcl | $$(CHIM_XILINX_DIR)/build/%.$(1)/
 	[ -e $(subst %,$$*,$(2)) ] || $$(MAKE) $(subst %,$$*,$(2))
 	@rm -f $$(CHIM_XILINX_DIR)/build/$$(*)*.$(1).log $$(CHIM_XILINX_DIR)/build/$$(*)*.$(1).jou
-	cd $$| && $$(VIVADO) -mode $(or $(3) -notrace,batch) -log ../$$(*).$(1).log -jou ../$$(*).$(1).jou -source $$< \
+	cd $$| && $$(VIVADO) $(if $(3), -mode $(3) -notrace, -mode batch) -log ../$$(*).$(1).log -jou ../$$(*).$(1).jou -source $$< \
 		-tclargs $$(CHIM_XILINX_HWS_URL) $$(or $$(CHIM_XILINX_HWS_PATH_$$*),{*}) $$* $(subst %,$$*,$(2)) 0
 endef
 
