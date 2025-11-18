@@ -92,6 +92,7 @@ TB_DUT = tb_chimera_soc
 ###############
 CHIM_SDK_TARGET ?= chimera-mxita
 CHISDK_ROOT = ../chimera-sdk
+HARDWARE_BACKEND ?= RTL
 
 $(CHISDK_ROOT)/deeploy_devel.sif:
 	@echo "Pulling DeEploy Singularity image. This may take a while..."
@@ -100,7 +101,7 @@ $(CHISDK_ROOT)/deeploy_devel.sif:
 
 $(CHISDK_ROOT)/build: $(CHISDK_ROOT)/deeploy_devel.sif
 	cd $(CHISDK_ROOT) && \
-	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D HARDWARE_BACKEND=RTL -B build"
+	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D HARDWARE_BACKEND=$(HARDWARE_BACKEND) -B build"
 
 chim-sdk: $(CHISDK_ROOT)/build
 	cd $(CHISDK_ROOT) && \
