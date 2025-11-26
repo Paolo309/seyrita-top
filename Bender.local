@@ -1,0 +1,2 @@
+overrides:
+  mx-ita:             { git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/mx-ita.git,    rev:  chimera-fpga-compatibility }
