@@ -18,8 +18,10 @@ module chimera_top_xilinx (
     input  logic jtag_tms_i,
     input  logic jtag_tdi_i,
     output logic jtag_tdo_o,
+`ifdef USE_JTAG_VDDGND
     output logic jtag_vdd_o,
     output logic jtag_gnd_o,
+`endif
 
     // UART
     output logic uart_tx_o,
@@ -65,8 +67,8 @@ module chimera_top_xilinx (
     );
 
     assign sys_rst = sys_reset | vio_reset;
-    `ila(sys_reset_btn, sys_reset)
-    `ila(sys_rst_comb, sys_rst)
+    // `ila(sys_reset_btn, sys_reset)
+    // `ila(sys_rst_comb, sys_rst)
 
     //================================================================
     // Reset
@@ -87,8 +89,10 @@ module chimera_top_xilinx (
     //  JTAG  //
     ////////////
 
+`ifdef USE_JTAG_VDDGND
     assign jtag_vdd_o = 1'b1;
     assign jtag_gnd_o = 1'b0;
+`endif
 
     /////////////////////////
     // "RTC" Clock Divider //
@@ -119,10 +123,10 @@ module chimera_top_xilinx (
 
     // ILAs for JTAG
 
-    `ila(jtag_tck, jtag_tck_i)
-    `ila(jtag_tms, jtag_tms_i)
-    `ila(jtag_tdi, jtag_tdi_i)
-    `ila(jtag_tdo, jtag_tdo_o)
+    // `ila(jtag_tck, jtag_tck_i)
+    // `ila(jtag_tms, jtag_tms_i)
+    // `ila(jtag_tdi, jtag_tdi_i)
+    // `ila(jtag_tdo, jtag_tdo_o)
 
     //================================================================
     // Chimera SoC
@@ -139,11 +143,11 @@ module chimera_top_xilinx (
         .rtc_i       ( rtc_clk_q ),
 
         // JTAG
-        .jtag_tck_i    ( jtag_tck ),
+        .jtag_tck_i    ( jtag_tck_i ),
         .jtag_trst_ni  ( 1'b1 ),
-        .jtag_tms_i    ( jtag_tms ),
-        .jtag_tdi_i    ( jtag_tdi ),
-        .jtag_tdo_o    ( jtag_tdo ),
+        .jtag_tms_i    ( jtag_tms_i ),
+        .jtag_tdi_i    ( jtag_tdi_i ),
+        .jtag_tdo_o    ( jtag_tdo_o ),
         .jtag_tdo_oe_o ( ),
 
         // UART

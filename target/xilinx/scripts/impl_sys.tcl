@@ -39,10 +39,7 @@ set_property XPM_LIBRARIES XPM_MEMORY [current_project]
 
 # Elaborate and open design to explore all clocks
 synth_design -rtl -name rtl_1 -verbose
-report_clocks -file ${project_root}/clocks.rpt
-
-# TODO *** open gui here
-exit
+# report_clocks -file ${project_root}/clocks.rpt
 
 # Synthesis
 launch_runs -jobs $num_jobs synth_1
@@ -61,15 +58,21 @@ set_property strategy Performance_Explore [get_runs impl_1]
 
 
 # Floorplanning
+# TODO move to board specific xdc
 
 create_pblock pblock_host
 resize_pblock pblock_host -add SLR1:SLR1
 add_cells_to_pblock pblock_host [get_cells [list i_chimera_soc/i_cheshire]]
 add_cells_to_pblock pblock_host [get_cells [list i_chimera_soc/i_memisland_domain]]
 
-create_pblock pblock_i_cluster_domain
-resize_pblock pblock_i_cluster_domain -add SLR0:SLR0
-add_cells_to_pblock pblock_i_cluster_domain [get_cells [list i_chimera_soc/i_cluster_domain]]
+create_pblock pblock_i_cluster_0_domain
+resize_pblock pblock_i_cluster_0_domain -add SLR0:SLR0
+add_cells_to_pblock pblock_i_cluster_0_domain [get_cells [list i_chimera_soc/i_cluster_domain/gen_clusters[0].gen_cluster_mxita.i_mxita_cluster]]
+
+create_pblock pblock_i_cluster_1_domain
+resize_pblock pblock_i_cluster_1_domain -add SLR2:SLR2
+add_cells_to_pblock pblock_i_cluster_1_domain [get_cells [list i_chimera_soc/i_cluster_domain/gen_clusters[1].gen_cluster_mxita.i_mxita_cluster]]
+
 
 # Implementation
 launch_runs -jobs $num_jobs impl_1 -to_step write_bitstream

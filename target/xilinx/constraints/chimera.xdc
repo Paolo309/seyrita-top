@@ -63,13 +63,10 @@ set_output_delay -max -clock clk_jtag [expr { 0.20 * $JTAG_TCK }] [get_ports jta
 set UART_IO_SPEED 200.0
 
 # TODO check again with this (methodology violation might already be fixed)
-# set_max_delay [expr { $UART_IO_SPEED * 0.35 }] -from [get_ports uart_rx_i]
-# set_false_path -hold -from [get_ports uart_rx_i]
-# set_max_delay [expr { $UART_IO_SPEED * 0.35 }] -to [get_ports uart_tx_o]
-# set_false_path -hold -to [get_ports uart_tx_o]
-# XXX Trying this instead because of methodology violation
-set_false_path -from [get_ports uart_rx_i]
-set_false_path -to   [get_ports uart_tx_o]
+set_max_delay [expr { $UART_IO_SPEED * 0.35 }] -from [get_ports uart_rx_i]
+set_false_path -hold -from [get_ports uart_rx_i]
+set_max_delay [expr { $UART_IO_SPEED * 0.35 }] -to [get_ports uart_tx_o]
+set_false_path -hold -to [get_ports uart_tx_o]
 
 ########
 # CDCs #

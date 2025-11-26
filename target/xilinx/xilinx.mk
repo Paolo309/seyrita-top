@@ -107,3 +107,6 @@ $(eval $(call chim_xilinx_util_rule,program,$(CHIM_XILINX_DIR)/out/chimera.%.bit
 
 # Program bitstream onto board
 $(eval $(call chim_xilinx_util_rule,connect,$(CHIM_XILINX_DIR)/out/chimera.%.bit,tcl))
+
+xilinx-clean-out:
+	rm -rf $(CHIM_XILINX_DIR)/out/
