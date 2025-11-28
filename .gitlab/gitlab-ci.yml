@@ -39,6 +39,7 @@ default:
 #########
 
 setup:
+  stage: setup
   cache:
     # inherit all global cache settings
     <<: *global_cache
