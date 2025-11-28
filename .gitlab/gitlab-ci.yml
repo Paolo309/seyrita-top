@@ -6,33 +6,33 @@
 
 # We initialize the nonfree repo, then spawn a sub-pipeline from it
 
-variables:
-  VSIM_TESTS: '["testCluster", "testClusterOffload", "testMemBypass", "testPeripheralsGating", "testHyperbusAddr", "testCfgBootAddr"]'
+# variables:
+#   VSIM_TESTS: '["testCluster", "testClusterOffload", "testMemBypass", "testPeripheralsGating", "testHyperbusAddr", "testCfgBootAddr"]'
 
-stages:
-  - nonfree
+# stages:
+#   - nonfree
 
-init:
-  stage: nonfree
-  script: make chim-nonfree-init
-  artifacts:
-    paths: [ nonfree/ci.yml ]
+# init:
+#   stage: nonfree
+#   script: make chim-nonfree-init
+#   artifacts:
+#     paths: [ nonfree/ci.yml ]
 
-process:
-    stage: nonfree
-    needs: [ init ]
-    script:
-      - envsubst '${VSIM_TESTS}' < nonfree/ci.yml > nonfree/processed_ci.yml
-    artifacts:
-      paths: [ nonfree/processed_ci.yml ]
+# process:
+#     stage: nonfree
+#     needs: [ init ]
+#     script:
+#       - envsubst '${VSIM_TESTS}' < nonfree/ci.yml > nonfree/processed_ci.yml
+#     artifacts:
+#       paths: [ nonfree/processed_ci.yml ]
 
-subpipe:
-  stage: nonfree
-  needs: [ process ]
-  trigger:
-    include:
-      - artifact: nonfree/processed_ci.yml
-        job: process
-    forward:
-      pipeline_variables: true
-    strategy: depend
+# subpipe:
+#   stage: nonfree
+#   needs: [ process ]
+#   trigger:
+#     include:
+#       - artifact: nonfree/processed_ci.yml
+#         job: process
+#     forward:
+#       pipeline_variables: true
+#     strategy: depend
