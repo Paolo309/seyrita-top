@@ -12,7 +12,7 @@ dependencies:
   register_interface:       { git: "https://github.com/pulp-platform/register_interface.git", version: 0.4.3  }
   axi:                      { git: https://github.com/colluca/axi,                            rev: multicast }
   cheshire:                 { git: "https://github.com/Paolo309/cheshire.git",                rev: mxita-multicast-fix}
-  snitch_cluster:           { git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/snitch_cluster.git,  rev: chimera-integration }
+  snitch_cluster:           { git: https://iis-git.ee.ethz.ch/seyrita/mx-ita/snitch_cluster.git,  rev: chimera-integration }
   common_cells:             { git: https://github.com/pulp-platform/common_cells,             version: 1.38.0 }
   idma:                     { git: "https://github.com/pulp-platform/iDMA.git",               rev: 9edf489f57389dce5e71252c79e337f527d3aded}
   memory_island:            { git: "https://github.com/pulp-platform/memory_island.git",      rev: 64828cb7a9ccc1f1656ec92d06129072f445c319 } # main branch
