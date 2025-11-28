@@ -38,15 +38,15 @@ default:
 # Setup #
 #########
 
-setup:
-  # stage: setup
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache
-    # override the policy
-    policy: pull-push
-  script:
-    - echo "Setup completed."
+# setup:
+#   # stage: setup
+#   cache:
+#     # inherit all global cache settings
+#     <<: *global_cache
+#     # override the policy
+#     policy: pull-push
+#   script:
+#     - echo "Setup completed."
 
 ############
 # Build all #
@@ -54,8 +54,9 @@ setup:
 
 build-all:
   # stage: build
-  needs: [setup]
+  # needs: [setup]
   script:
+    - bender checkout
     - make chim-all
 
 hello-world:
