@@ -53,4 +53,6 @@ target/xilinx/build*/
 target/xilinx/scripts/add_sources*.tcl
 *.bit
 *.ltx
+*.jou
+*.log
 
