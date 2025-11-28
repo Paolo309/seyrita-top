@@ -426,7 +426,8 @@ module mxita_cluster
     .tcdm_rsp_i     (cluster_tcdm_ext_rsp),
     .hwpe_ctrl_req_i(hwpectrl_req),
     .hwpe_ctrl_rsp_o(hwpectrl_rsp),
-    .hwpe_evt_o     (mxip)
+    .hwpe_evt_o     (mxip),
+    .hart_base_id_i  (hart_base_id_i)
   );
 
   //////////////////////////
