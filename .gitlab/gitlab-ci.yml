@@ -18,10 +18,10 @@ variables:
 # -------------------
 # Define pipeline stages
 # -------------------
-stages:
-  - setup
-  - build
-  - test
+# stages:
+#   - setup
+#   - build
+#   - test
 
 default:
   before_script:
@@ -39,7 +39,7 @@ default:
 #########
 
 setup:
-  stage: setup
+  # stage: setup
   cache:
     # inherit all global cache settings
     <<: *global_cache
@@ -53,12 +53,13 @@ setup:
 ############
 
 build-all:
-  stage: build
+  # stage: build
   needs: [setup]
   script:
-    - make chim-all -j
+    - make chim-all
 
 hello-world:
-  stage: test
+  # stage: test
+  needs: [build-all]
   script:
     - echo "Hello world from seyrita-top CI!"
