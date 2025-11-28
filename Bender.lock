@@ -179,14 +179,14 @@ packages:
     - redundancy_cells
     - register_interface
   hwpe-ctrl:
-    revision: 634a6797aa67d89c5d9b290b2cb47dadc53ebd8d
+    revision: 1c4387eb0f5d4b32c6cd29019a6de2a0689b7cc7
     version: null
     source:
-      Git: https://github.com/Ludi-1/hwpe-ctrl.git
+      Git: https://github.com/irene-ik/hwpe-ctrl.git
     dependencies:
     - tech_cells_generic
   hwpe-stream:
-    revision: 1b87f50d2b2a8b365e851ed52eebb07676f3b106
+    revision: 00583b588cf4130231c79d208806871c8ac68e59
     version: null
     source:
       Git: https://github.com/pulp-platform/hwpe-stream.git
@@ -241,7 +241,7 @@ packages:
     - common_verification
     - tech_cells_generic
   mx-ita:
-    revision: e5c197e8dc556d726bb9b781aa07d209488bfecf
+    revision: 796c9eb82131ad720935fa3ddebb4a563fa648ca
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/mx-ita.git
@@ -288,8 +288,8 @@ packages:
     - register_interface
     - tech_cells_generic
   register_interface:
-    revision: 8e8c209ea559d3b54f45cf30fcce95ce70ff5e49
-    version: 0.4.6
+    revision: d6e1d4cdaab7870f4faf3f88a1c788eaf5ac129d
+    version: 0.4.7
     source:
       Git: https://github.com/pulp-platform/register_interface.git
     dependencies:
