@@ -21,6 +21,7 @@ variables:
 stages:
   - setup
   - build
+  - test
 
 default:
   before_script:
@@ -55,3 +56,8 @@ build-all:
   needs: [setup]
   script:
     - make chim-all -j
+
+hello-world:
+  stage: test
+  script:
+    - echo "Hello world from seyrita-top CI!"
