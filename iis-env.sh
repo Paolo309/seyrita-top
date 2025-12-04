@@ -32,3 +32,6 @@ fi
 if [ -z "$VIRTUAL_ENV" ] || [ "$VIRTUAL_ENV" != "$(realpath .venv)" ]; then
   source .venv/bin/activate
 fi
+
+export PATH=$PATH:$RISCV_GCC_BINROOT
+
