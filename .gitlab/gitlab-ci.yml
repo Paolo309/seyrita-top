@@ -58,6 +58,7 @@ build-all:
   # needs: [setup]
   script:
     - bender checkout
+    - make chim-all || echo "retrying..."
     - make chim-all
 
 hello-world:
