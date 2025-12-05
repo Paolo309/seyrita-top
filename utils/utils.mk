@@ -38,4 +38,13 @@ $(CHIM_UTILS_DIR)/verible-verilog/verible-verilog-format:
 utils-clean:
 	@rm -rf $(CHIM_UTILS_DIR)/verible-verilog
 
+# Usage:
+#   $(call submodule_path,chimera-sdk)
+# This returns the submodule path as stored in .gitmodules,
+# e.g., "sw/chimera-sdk".
+define submodule_path
+$(shell git config -f .gitmodules --get-regexp path \
+        | awk '/$(1)/ {print $$2; exit}')
+endef
+
 endif # chim_utils_mk

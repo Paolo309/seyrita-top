@@ -28,7 +28,7 @@ SNITCH_ROOT ?= .
 MXITA_ROOT  ?= .
 IDMA_ROOT   ?= .
 HYPERB_ROOT ?= .
-CHISDK_ROOT ?= ../chimera-sdk # TODO get it from bender or submodule
+CHISDK_ROOT ?= $(call submodule_path,chimera-sdk)
 
 # Bender prerequisites
 BENDER_YML = $(CHIM_ROOT)/Bender.yml
