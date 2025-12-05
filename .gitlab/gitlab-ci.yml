@@ -30,8 +30,10 @@ default:
     key:
       files:
         - requirements.txt
+      prefix: "ghcr_io_pulp_platform_deeploy_devel"
     paths:
       - .cache/pip
+      - .cache/singularity
     policy: pull
 
 #########

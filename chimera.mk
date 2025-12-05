@@ -96,7 +96,7 @@ HARDWARE_BACKEND ?= RTL
 $(CHISDK_ROOT)/deeploy_devel.sif:
 	@echo "Pulling DeEploy Singularity image. This may take a while..."
 	cd $(CHISDK_ROOT) && \
-	SINGULARITY_CACHEDIR=$(SINGULARITY_CACHE_DIR) singularity pull docker:ghcr.io/pulp-platform/deeploy:devel
+	SINGULARITY_CACHEDIR=$(SINGULARITY_CACHE_DIR) singularity pull docker://ghcr.io/pulp-platform/deeploy:devel
 
 $(CHISDK_ROOT)/build-$(HARDWARE_BACKEND): $(CHISDK_ROOT)/deeploy_devel.sif
 	cd $(CHISDK_ROOT) && \
