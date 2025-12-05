@@ -100,16 +100,25 @@ $(CHISDK_ROOT)/deeploy_devel.sif:
 
 $(CHISDK_ROOT)/build-$(HARDWARE_BACKEND): $(CHISDK_ROOT)/deeploy_devel.sif
 	cd $(CHISDK_ROOT) && \
-	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D HARDWARE_BACKEND=$(HARDWARE_BACKEND) -B build-$(HARDWARE_BACKEND)"
+	singularity exec \
+		-W $(CHISDK_ROOT) \
+		-e deeploy_devel.sif /bin/bash \
+		-c "cd $(CHISDK_ROOT) && cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D HARDWARE_BACKEND=$(HARDWARE_BACKEND) -B build-$(HARDWARE_BACKEND)"
 
 chim-sdk: $(CHISDK_ROOT)/build-$(HARDWARE_BACKEND)
 	cd $(CHISDK_ROOT) && \
-	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake --build build-$(HARDWARE_BACKEND) -j"
+	singularity exec \
+		-W $(CHISDK_ROOT) \
+		-e deeploy_devel.sif /bin/bash \
+		-c "cd $(CHISDK_ROOT) && cmake --build build-$(HARDWARE_BACKEND) -j"
 	@echo "Binaries for target '$(CHIM_SDK_TARGET)' are available in '$(CHISDK_ROOT)/build-$(HARDWARE_BACKEND)/bin'"
 
 clean-chim-sdk:
 	cd $(CHISDK_ROOT) && \
-	singularity exec -W $(CHISDK_ROOT) -e deeploy_devel.sif /bin/bash -c "cmake --build build-$(HARDWARE_BACKEND) -t clean"
+	singularity exec \
+		-W $(CHISDK_ROOT) \
+		-e deeploy_devel.sif /bin/bash \
+		-c "cd $(CHISDK_ROOT) && cmake --build build-$(HARDWARE_BACKEND) -t clean"
 
 .PHONY: chim-sdk
 

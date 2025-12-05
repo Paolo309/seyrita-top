@@ -44,7 +44,7 @@ utils-clean:
 # e.g., "sw/chimera-sdk".
 define submodule_path
 $(shell git config -f .gitmodules --get-regexp path \
-        | awk '/$(1)/ {print $$2; exit}')
+        | awk '/$(1)/ {print $$2; exit}' | xargs realpath)
 endef
 
 endif # chim_utils_mk
