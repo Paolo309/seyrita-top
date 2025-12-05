@@ -52,16 +52,15 @@ default:
 # Build all #
 ############
 
-build-all:
-  # stage: build
-  # needs: [setup]
+test-all:
   script:
     - bender checkout
-    - make chim-all || echo "retrying..."
     - make chim-all
+    - make chim-sdk HARDWARE_BACKEND=RTL
+    - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
 
-hello-world:
-  # stage: test
-  needs: [build-all]
-  script:
-    - echo "Hello world from seyrita-top CI!"
+# hello-world:
+#   # stage: test
+#   needs: [build-all]
+#   script:
+#     - echo "Hello world from seyrita-top CI!"
