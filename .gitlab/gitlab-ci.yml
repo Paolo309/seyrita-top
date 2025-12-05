@@ -61,6 +61,8 @@ build-sim-sw:
 build-sim-hw:
   stage: build
   needs: [setup]
+  cache:
+    <<: *global_cache
   script:
     - make chim-all || echo "Retrying..."
     - make chim-all
@@ -88,6 +90,8 @@ build-fpga-sw:
 build-fpga-vcu128-hw:
   stage: build
   needs: [setup]
+  cache:
+    <<: *global_cache
   script:
     - make chim-hw-init
     - make chim-xilinx-vcu128
@@ -100,12 +104,16 @@ build-fpga-vcu128-hw:
 test-sim:
   stage: run
   needs: [build-sim-hw, build-sim-sw]
+  cache:
+    <<: *global_cache
   script:
     - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
 
 test-fpga-vcu128:
   stage: run
   needs: [build-fpga-vcu128-hw, build-fpga-sw]
+  cache:
+    <<: *global_cache
   script:
     - file target/xilinx/out/*
     - echo "WIP - will run tests on VCU128 FPGA board"
