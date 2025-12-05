@@ -26,7 +26,6 @@ variables:
 default:
   before_script:
     - source iis-env.sh
-    - riscv -pulp-gcc-2.5.0 zsh
   cache: &global_cache
     key:
       files:
