@@ -39,14 +39,12 @@ default:
 #########
 
 setup:
+  before_script: []
   cache:
     # inherit all global cache settings
     <<: *global_cache
     # override the policy
     policy: pull-push
-  artifacts:
-    paths:
-      - .venv
   script:
     - echo "Setup completed."
 
@@ -56,7 +54,6 @@ setup:
 
 test-all:
   needs: [setup]
-  dependencies: [setup]
   script:
     - bender checkout
     - make chim-all || echo "Retrying..."
