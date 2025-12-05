@@ -89,6 +89,7 @@ build-fpga-vcu128-hw:
   stage: build
   needs: [setup]
   script:
+    - make chim-hw-init
     - make chim-xilinx-vcu128
   artifacts:
     name: "sim-hw-vcu128"
@@ -106,6 +107,7 @@ test-fpga-vcu128:
   stage: run
   needs: [build-fpga-vcu128-hw, build-fpga-sw]
   script:
+    - file target/xilinx/out/*
     - echo "WIP - will run tests on VCU128 FPGA board"
 
 ############
