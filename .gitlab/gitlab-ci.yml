@@ -44,7 +44,12 @@ setup:
     <<: *global_cache
     # override the policy
     policy: pull-push
+  artifacts:
+    paths:
+      - .venv
+      - .bender
   script:
+    - bender checkout
     - echo "Setup completed."
 
 ############
@@ -53,9 +58,9 @@ setup:
 
 test-all:
   needs: [setup]
+  dependencies: [setup]
   script:
-    - bender checkout
-    - make chim-all || "Retrying..."
+    - make chim-all || echo "Retrying..."
     - make chim-all
     - make chim-sdk HARDWARE_BACKEND=RTL
     - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
