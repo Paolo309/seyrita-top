@@ -47,9 +47,7 @@ setup:
   artifacts:
     paths:
       - .venv
-      - .bender
   script:
-    - bender checkout
     - echo "Setup completed."
 
 ############
@@ -60,6 +58,7 @@ test-all:
   needs: [setup]
   dependencies: [setup]
   script:
+    - bender checkout
     - make chim-all || echo "Retrying..."
     - make chim-all
     - make chim-sdk HARDWARE_BACKEND=RTL
