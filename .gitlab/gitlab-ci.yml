@@ -41,7 +41,6 @@ default:
 #########
 
 setup:
-  before_script: []
   cache:
     # inherit all global cache settings
     <<: *global_cache
