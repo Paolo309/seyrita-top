@@ -1,0 +1,3 @@
+[submodule "sw/chimera-sdk"]
+	path = sw/chimera-sdk
+	url = git@github.com:Paolo309/chimera-sdk.git
