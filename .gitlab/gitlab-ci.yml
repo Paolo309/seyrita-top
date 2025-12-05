@@ -38,23 +38,24 @@ default:
 # Setup #
 #########
 
-# setup:
-#   # stage: setup
-#   cache:
-#     # inherit all global cache settings
-#     <<: *global_cache
-#     # override the policy
-#     policy: pull-push
-#   script:
-#     - echo "Setup completed."
+setup:
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+    # override the policy
+    policy: pull-push
+  script:
+    - echo "Setup completed."
 
 ############
 # Build all #
 ############
 
 test-all:
+  needs: [setup]
   script:
     - bender checkout
+    - make chim-all || "Retrying..."
     - make chim-all
     - make chim-sdk HARDWARE_BACKEND=RTL
     - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
