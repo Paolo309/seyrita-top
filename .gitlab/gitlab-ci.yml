@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-# Author: Sergio Mazzola <smazzola@iis.ee.ethz.ch>
+# Author: Paolo Galfano <paologalfano99@gmail.com>
 
 variables:
   GIT_STRATEGY: clone
@@ -37,6 +37,7 @@ default:
 #########
 # Setup #
 #########
+
 setup:
   stage: setup
   cache:
@@ -44,6 +45,10 @@ setup:
     policy: pull-push
   script:
     - echo "Setup completed."
+
+##############
+# SIMULATION #
+##############
 
 build-sim-sw:
   stage: build
@@ -74,8 +79,13 @@ build-sim-hw:
       - target/sim/vsim/compile.tcl
       - modelsim.ini
 
+########
+# FPGA #
+########
+
 build-fpga-sw:
   stage: build
+  timeout: 6h
   before_script: []
   cache:
     <<: *global_cache
@@ -89,6 +99,7 @@ build-fpga-sw:
 
 build-fpga-vcu128-hw:
   stage: build
+  timeout: 6h
   needs: [setup]
   cache:
     <<: *global_cache
