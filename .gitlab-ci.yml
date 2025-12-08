@@ -135,6 +135,13 @@ setup-key:
     paths:
       - $HOME/.ssh
 
+test-key:
+  stage: setup
+  needs: [setup-key]
+  before_script: []
+  script:
+    - ssh msc25h20@boardberg.ee.ethz.ch "echo 'OK'"
+
 test-fpga-vcu128:
   stage: run
   needs: [build-fpga-vcu128-hw, build-fpga-sw, setup-key]
