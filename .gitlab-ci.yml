@@ -122,6 +122,7 @@ test-sim:
     - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
 
 setup-key:
+  stage: setup
   before_script: []
   script:
     - mkdir -p $HOME/.ssh
