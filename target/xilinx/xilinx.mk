@@ -105,8 +105,11 @@ $(eval $(call chim_xilinx_util_rule,program,$(CHIM_XILINX_DIR)/out/chimera.%.bit
 # CHS_XILINX_FLASH_IMG ?= $(CHS_SW_DIR)/boot/linux.%.gpt.bin
 # $(eval $(call chs_xilinx_util_rule,flash,$(CHS_XILINX_FLASH_IMG)))
 
-# Program bitstream onto board
+# Connect to the already programmed board
 $(eval $(call chim_xilinx_util_rule,connect,$(CHIM_XILINX_DIR)/out/chimera.%.bit,tcl))
+
+# Reset the board (must be already programmed)
+$(eval $(call chim_xilinx_util_rule,reset,$(CHIM_XILINX_DIR)/out/chimera.%.bit))
 
 xilinx-clean-out:
 	rm -rf $(CHIM_XILINX_DIR)/out/

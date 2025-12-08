@@ -121,11 +121,24 @@ test-sim:
   script:
     - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
 
+setup-key:
+  before_script: []
+  script:
+    - mkdir -p $HOME/.ssh
+    - echo "$BOARDBERG_MSC25H20_SSH_KEY" | base64 -d > $HOME/.ssh/id_ed25519
+    - ssh-keyscan boardberg.ee.ethz.ch >> $HOME/.ssh/known_hosts 2>/dev/null
+    - chmod 600 $HOME/.ssh/id_ed25519
+  artifacts:
+    name: "ssh-key"
+    expire_in: 12 hours
+    paths:
+      - $HOME/.ssh
+
 test-fpga-vcu128:
   stage: run
-  needs: [build-fpga-vcu128-hw, build-fpga-sw]
+  needs: [build-fpga-vcu128-hw, build-fpga-sw, setup-key]
   cache:
     <<: *global_cache
   script:
     - file target/xilinx/out/*
-    - echo "WIP - will run tests on VCU128 FPGA board"
+    - make test-fpga

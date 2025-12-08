@@ -47,4 +47,10 @@ $(shell git config -f .gitmodules --get-regexp path \
         | awk '/$(1)/ {print $$2; exit}' | xargs realpath)
 endef
 
+# Test FPGA in CI
+.PHONY: test-fpga
+test-fpga:
+	export CHISDK_ROOT=$(CHISDK_ROOT) && \
+	$(CHIM_ROOT)/utils/fpga/test-fpga.sh
+
 endif # chim_utils_mk
