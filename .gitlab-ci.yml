@@ -1,2 +1,148 @@
-include:
-  - local: '.gitlab/gitlab-ci.yml'
+# Copyright 2024 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+# Author: Paolo Galfano <paologalfano99@gmail.com>
+
+variables:
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursive
+  # Enable colors in CI terminal
+  TERM: ansi
+  FORCE_COLOR: 1
+  # Configure environment
+  # TODO
+  # Override pip cache directory
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  SINGULARITY_BINDPATH: "/scratch"
+
+stages:
+  - setup
+  - build
+  - run
+default:
+  before_script:
+    - source iis-env.sh
+    - bender checkout
+  cache: &global_cache
+    key:
+      files:
+        - requirements.txt
+      prefix: "ghcr_io_pulp_platform_deeploy_devel"
+    paths:
+      - .cache/pip
+      - .cache/singularity
+    policy: pull
+
+#########
+# Setup #
+#########
+
+setup:
+  stage: setup
+  cache:
+    <<: *global_cache
+    policy: pull-push
+  script:
+    - echo "Setup completed."
+
+##############
+# SIMULATION #
+##############
+
+build-sim-sw:
+  stage: build
+  before_script: []
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-sdk HARDWARE_BACKEND=RTL
+  artifacts:
+    name: "sim-sw-bin"
+    expire_in: 2 hours
+    paths:
+      - sw/chimera-sdk/build-RTL/bin/
+
+build-sim-hw:
+  stage: build
+  needs: [setup]
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-all || echo "Retrying..."
+    - make chim-all
+  artifacts:
+    name: "sim-hw-out"
+    expire_in: 3 hours
+    paths:
+      - target/sim/vsim/work/
+      - target/sim/vsim/compile.tcl
+      - modelsim.ini
+
+########
+# FPGA #
+########
+
+build-fpga-sw:
+  stage: build
+  timeout: 6h
+  before_script: []
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-sdk HARDWARE_BACKEND=ASIC
+  artifacts:
+    name: "sim-sw-bin"
+    expire_in: 12 hours
+    paths:
+      - sw/chimera-sdk/build-ASIC/bin/
+
+build-fpga-vcu128-hw:
+  stage: build
+  timeout: 6h
+  needs: [setup]
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-hw-init
+    - make chim-xilinx-vcu128
+  artifacts:
+    name: "sim-hw-vcu128"
+    expire_in: 24 hours
+    paths:
+      - target/xilinx/out/
+
+test-sim:
+  stage: run
+  needs: [build-sim-hw, build-sim-sw]
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
+
+test-fpga-vcu128:
+  stage: run
+  needs: [build-fpga-vcu128-hw, build-fpga-sw]
+  cache:
+    <<: *global_cache
+  script:
+    - file target/xilinx/out/*
+    - echo "WIP - will run tests on VCU128 FPGA board"
+
+############
+# Build all #
+############
+
+# test-sim:
+#   needs: [setup]
+#   script:
+#     - make chim-all || echo "Retrying..."
+#     - make chim-all
+#     - make chim-sdk HARDWARE_BACKEND=RTL
+#     - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
+
+# hello-world:
+#   # stage: test
+#   needs: [build-all]
+#   script:
+#     - echo "Hello world from seyrita-top CI!"
