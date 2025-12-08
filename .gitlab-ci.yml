@@ -17,133 +17,115 @@ variables:
   SINGULARITY_BINDPATH: "/scratch"
   SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
-setup-key:
-  before_script: []
+stages:
+  - setup
+  - build
+  - run
+default:
+  before_script:
+    - source iis-env.sh
+    - bender checkout
+  cache: &global_cache
+    key:
+      files:
+        - requirements.txt
+      prefix: "ghcr_io_pulp_platform_deeploy_devel"
+    paths:
+      - .cache/pip
+      - .cache/singularity
+    policy: pull
+
+#########
+# Setup #
+#########
+
+setup:
+  stage: setup
+  cache:
+    <<: *global_cache
+    policy: pull-push
   script:
-    - mkdir -p $HOME/.ssh
-    - echo "$BOARDBERG_MSC25H20_SSH_KEY" | base64 -d > $HOME/.ssh/id_ed25519
-    - ssh-keyscan boardberg.ee.ethz.ch >> $HOME/.ssh/known_hosts 2>/dev/null
-    - chmod 600 $HOME/.ssh/id_ed25519
-    - echo "test" > testfile.txt
-    - scp testfile.txt msc25h20@boardberg.ee.ethz.ch:~/
-    - ssh msc25h20@boardberg.ee.ethz.ch "ls -la ~/"
+    - echo "Setup completed."
 
+##############
+# SIMULATION #
+##############
 
-# test-key:
-#   needs: [setup-key]
-#   script:
-#     - ssh msc25h20@boardberg.ee.ethz.ch
-#     - ls -la
+build-sim-sw:
+  stage: build
+  before_script: []
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-sdk HARDWARE_BACKEND=RTL
+  artifacts:
+    name: "sim-sw-bin"
+    expire_in: 2 hours
+    paths:
+      - sw/chimera-sdk/build-RTL/bin/
 
-# stages:
-#   - setup
-#   - build
-#   - run
-# default:
-#   before_script:
-#     - source iis-env.sh
-#     - bender checkout
-#   cache: &global_cache
-#     key:
-#       files:
-#         - requirements.txt
-#       prefix: "ghcr_io_pulp_platform_deeploy_devel"
-#     paths:
-#       - .cache/pip
-#       - .cache/singularity
-#     policy: pull
+build-sim-hw:
+  stage: build
+  needs: [setup]
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-all || echo "Retrying..."
+    - make chim-all
+  artifacts:
+    name: "sim-hw-out"
+    expire_in: 3 hours
+    paths:
+      - target/sim/vsim/work/
+      - target/sim/vsim/compile.tcl
+      - modelsim.ini
 
-# #########
-# # Setup #
-# #########
+########
+# FPGA #
+########
 
-# setup:
-#   stage: setup
-#   cache:
-#     <<: *global_cache
-#     policy: pull-push
-#   script:
-#     - echo "Setup completed."
+build-fpga-sw:
+  stage: build
+  timeout: 6h
+  before_script: []
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-sdk HARDWARE_BACKEND=ASIC
+  artifacts:
+    name: "sim-sw-bin"
+    expire_in: 12 hours
+    paths:
+      - sw/chimera-sdk/build-ASIC/bin/
 
-# ##############
-# # SIMULATION #
-# ##############
+build-fpga-vcu128-hw:
+  stage: build
+  timeout: 6h
+  needs: [setup]
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-hw-init
+    - make chim-xilinx-vcu128
+  artifacts:
+    name: "sim-hw-vcu128"
+    expire_in: 24 hours
+    paths:
+      - target/xilinx/out/
 
-# build-sim-sw:
-#   stage: build
-#   before_script: []
-#   cache:
-#     <<: *global_cache
-#   script:
-#     - make chim-sdk HARDWARE_BACKEND=RTL
-#   artifacts:
-#     name: "sim-sw-bin"
-#     expire_in: 2 hours
-#     paths:
-#       - sw/chimera-sdk/build-RTL/bin/
+test-sim:
+  stage: run
+  needs: [build-sim-hw, build-sim-sw]
+  cache:
+    <<: *global_cache
+  script:
+    - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
 
-# build-sim-hw:
-#   stage: build
-#   needs: [setup]
-#   cache:
-#     <<: *global_cache
-#   script:
-#     - make chim-all || echo "Retrying..."
-#     - make chim-all
-#   artifacts:
-#     name: "sim-hw-out"
-#     expire_in: 3 hours
-#     paths:
-#       - target/sim/vsim/work/
-#       - target/sim/vsim/compile.tcl
-#       - modelsim.ini
-
-# ########
-# # FPGA #
-# ########
-
-# build-fpga-sw:
-#   stage: build
-#   timeout: 6h
-#   before_script: []
-#   cache:
-#     <<: *global_cache
-#   script:
-#     - make chim-sdk HARDWARE_BACKEND=ASIC
-#   artifacts:
-#     name: "sim-sw-bin"
-#     expire_in: 12 hours
-#     paths:
-#       - sw/chimera-sdk/build-ASIC/bin/
-
-# build-fpga-vcu128-hw:
-#   stage: build
-#   timeout: 6h
-#   needs: [setup]
-#   cache:
-#     <<: *global_cache
-#   script:
-#     - make chim-hw-init
-#     - make chim-xilinx-vcu128
-#   artifacts:
-#     name: "sim-hw-vcu128"
-#     expire_in: 24 hours
-#     paths:
-#       - target/xilinx/out/
-
-# test-sim:
-#   stage: run
-#   needs: [build-sim-hw, build-sim-sw]
-#   cache:
-#     <<: *global_cache
-#   script:
-#     - make chim-run-batch PRELOAD=3 BINARY=sw/chimera-sdk/build-RTL/bin/test_mxita_app
-
-# test-fpga-vcu128:
-#   stage: run
-#   needs: [build-fpga-vcu128-hw, build-fpga-sw]
-#   cache:
-#     <<: *global_cache
-#   script:
-#     - file target/xilinx/out/*
-#     - echo "WIP - will run tests on VCU128 FPGA board"
+test-fpga-vcu128:
+  stage: run
+  needs: [build-fpga-vcu128-hw, build-fpga-sw]
+  cache:
+    <<: *global_cache
+  script:
+    - file target/xilinx/out/*
+    - echo "WIP - will run tests on VCU128 FPGA board"
