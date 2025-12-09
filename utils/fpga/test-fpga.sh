@@ -7,6 +7,7 @@ BOARD_CLASS=vcu128
 # BOOK AND RUN #
 ################
 
+# TODO put in a "infinite" loop to retry booking if no board is available, every X minutes (CI timeout will stop the loop and fail)
 echo "Booking and running FPGA board of class $BOARD_CLASS ..."
 result=$(ssh msc25h20@boardberg.ee.ethz.ch "bash -lc 'bash -s $WORKDIR $BOARD_CLASS'" < utils/fpga/book-and-run.sh)
 status=$?

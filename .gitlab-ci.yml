@@ -144,6 +144,7 @@ test-key:
 
 test-fpga-vcu128:
   stage: run
+  before_script: []
   needs: [build-fpga-vcu128-hw, build-fpga-sw, setup-key]
   cache:
     <<: *global_cache
