@@ -115,6 +115,7 @@ build-fpga-vcu128-hw:
 
 test-sim:
   stage: run
+  timeout: 2h
   needs: [build-sim-hw, build-sim-sw]
   cache:
     <<: *global_cache
@@ -145,7 +146,7 @@ test-key:
 test-fpga-vcu128:
   stage: run
   before_script: []
-  needs: [build-fpga-vcu128-hw, build-fpga-sw, setup-key]
+  needs: [build-fpga-vcu128-hw, build-fpga-sw, setup-key, test-sim]
   cache:
     <<: *global_cache
   script:
