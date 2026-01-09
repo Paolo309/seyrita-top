@@ -357,9 +357,7 @@ module mxita_cluster
     .narrow_ext_req_o  (cluster_narrow_ext_req), // -> AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
     .narrow_ext_resp_i (cluster_narrow_ext_rsp), // -> AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
     .tcdm_ext_req_i(cluster_tcdm_ext_req),  // -> HWPE
-    .tcdm_ext_resp_o(cluster_tcdm_ext_rsp),  // -> HWPE
-
-    .cluster_user_o (cluster_user)
+    .tcdm_ext_resp_o(cluster_tcdm_ext_rsp)
   );
 
 
@@ -445,7 +443,7 @@ module mxita_cluster
     .hwpe_ctrl_req_i(hwpectrl_req),
     .hwpe_ctrl_rsp_o(hwpectrl_rsp),
     .hwpe_evt_o     (mxip),
-    .cluster_user_i  (cluster_user)
+    .cluster_user_i  ((hart_base_id_i / NrCores) +  (hart_base_id_i % NrCores) + 1'b1)
   );
 
   //////////////////////////
