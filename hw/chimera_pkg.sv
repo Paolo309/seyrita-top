@@ -126,11 +126,11 @@ package chimera_pkg;
   localparam doub_bt MemIslRegionEnd = MemIslRegionStart + 64'h8_0000;
 
   localparam aw_bt MemIslAxiMstIdWidth = 1;
-  localparam byte_bt MemIslNarrowToWideFactor = 4;
+  localparam byte_bt MemIslNarrowToWideFactor = 16;
   localparam byte_bt MemIslNarrowPorts = 1;
   localparam byte_bt MemIslWidePorts = $countones(ChimeraClusterCfg.hasWideMasterPort);
   localparam byte_bt MemIslNumWideBanks = 2;
-  localparam shrt_bt MemIslWordsPerBank = 1024;
+  localparam shrt_bt MemIslWordsPerBank = 4096;
   // Size of memory island: MemIslNumWideBanks * MemIslWordsPerBank * MemIslNarrowToWideFactor * <bytes per word>
   // bytes per word is cfg.AxiDataWidth / 8
 
@@ -241,9 +241,6 @@ package chimera_pkg;
   function automatic chimera_cfg_t gen_mxita_cfg();
     chimera_cfg_t chimera_cfg;
     chimera_cfg = gen_chimera_cfg();
-
-    // Memory Island size: 2 banks x 1024 words x 16 (narrow to wide) x 4 bytes = 128KB
-    chimera_cfg.MemIslNarrowToWideFactor = 16;
 
     chimera_cfg.ChsCfg.AxiUserWidth = 4;
 
