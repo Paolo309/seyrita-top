@@ -258,7 +258,19 @@ module mxita_cluster
 
   logic          [NrCores-1:0] mxip;
 
-  axi_user_t cluster_user;
+  function automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] get_cached_regions();
+    automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] cached_regions;
+    cached_regions = '{default: '0};
+    cached_regions[0] = '{base: HyperbusRegionStart, mask: 48'hffff_1000_0000}; // Hyperbus (256 MiB)
+    cached_regions[1] = '{base: MemIslRegionStart, mask: 48'hffff_fff8_0000}; // Memory Island ( 512 KiB)
+    return cached_regions;
+  endfunction
+
+  localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
+      NrCachedRegionRules: 2,
+      CachedRegion: get_cached_regions(),
+      default: 0
+  };
 
   snitch_cluster #(
     .PhysicalAddrWidth(Cfg.ChsCfg.AddrWidth),
@@ -283,6 +295,7 @@ module mxita_cluster
     .BootAddr        (SnitchBootROMRegionStart),
     .AliasRegionEnable(1),
     .AliasRegionBase(48'h18000000), // TODO move to config
+    .SnitchPMACfg     (SnitchPMACfg),
     .IntBootromEnable(0),
 
     .NrHives(1),
