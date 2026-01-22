@@ -1,3 +1,2 @@
 overrides:
   mx-ita:             { git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/mx-ita.git,    rev:  chimera-fpga-compatibility }
-  hwpe-ctrl:          { git: https://github.com/irene-ik/hwpe-ctrl.git,           rev:  1c4387eb0f5d4b32c6cd29019a6de2a0689b7cc7 }

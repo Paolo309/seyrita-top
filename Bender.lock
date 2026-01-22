@@ -179,10 +179,10 @@ packages:
     - redundancy_cells
     - register_interface
   hwpe-ctrl:
-    revision: 1c4387eb0f5d4b32c6cd29019a6de2a0689b7cc7
-    version: null
+    revision: 2e7f41c55284b502e5deb019ceae904702d06494
+    version: 2.1.0
     source:
-      Git: https://github.com/irene-ik/hwpe-ctrl.git
+      Git: https://github.com/pulp-platform/hwpe-ctrl.git
     dependencies:
     - tech_cells_generic
   hwpe-stream:
@@ -241,7 +241,7 @@ packages:
     - common_verification
     - tech_cells_generic
   mx-ita:
-    revision: 5959ba2448c7982aebed402801b620416dd9af45
+    revision: 04ca2f3ea8c150a15622cdced7fd414a3eefd5a5
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/mx-ita.git
@@ -322,7 +322,7 @@ packages:
     - common_cells
     - register_interface
   snitch_cluster:
-    revision: f5551af23f1a4f05682beed1021b1f4b1d75775f
+    revision: fd6c8d9e2c29e01c5dbddac7377a5603a1b10dd0
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/snitch_cluster.git

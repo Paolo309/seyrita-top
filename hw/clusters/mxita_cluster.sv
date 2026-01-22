@@ -257,6 +257,7 @@ module mxita_cluster
   hwpectrl_rsp_t               hwpectrl_rsp;
 
   logic          [NrCores-1:0] mxip;
+  logic                        hwpe_clk_en;
 
   function automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] get_cached_regions();
     automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] cached_regions;
@@ -357,7 +358,9 @@ module mxita_cluster
     .narrow_ext_req_o  (cluster_narrow_ext_req), // -> AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
     .narrow_ext_resp_i (cluster_narrow_ext_rsp), // -> AXI DW converter -> AXI cut -> AXI to TCDM -> HWPE
     .tcdm_ext_req_i(cluster_tcdm_ext_req),  // -> HWPE
-    .tcdm_ext_resp_o(cluster_tcdm_ext_rsp)
+    .tcdm_ext_resp_o(cluster_tcdm_ext_rsp),
+
+    .hwpe_clk_en_o    (hwpe_clk_en)
   );
 
 
@@ -424,6 +427,8 @@ module mxita_cluster
     .tcdm_rsp_i(hwpectrl_rsp)
   );
 
+  logic [9:0] hwpe_cluster_user;
+  assign hwpe_cluster_user = (hart_base_id_i / NrCores) + (hart_base_id_i % NrCores) + 1'b1;
 
   snitch_hwpe_subsystem #(
     .tcdm_req_t   (tcdm_dma_req_t),
@@ -438,12 +443,13 @@ module mxita_cluster
     .clk_i          (clu_clk_i),
     .rst_ni         (rst_ni),
     .test_mode_i    (1'b0),
+    .hwpe_clk_en_i  (hwpe_clk_en),
     .tcdm_req_o     (cluster_tcdm_ext_req),
     .tcdm_rsp_i     (cluster_tcdm_ext_rsp),
     .hwpe_ctrl_req_i(hwpectrl_req),
     .hwpe_ctrl_rsp_o(hwpectrl_rsp),
     .hwpe_evt_o     (mxip),
-    .cluster_user_i  ((hart_base_id_i / NrCores) +  (hart_base_id_i % NrCores) + 1'b1)
+    .cluster_user_i  (hwpe_cluster_user[ClusterNarrowAxiMstIdWidth+2-1:0])
   );
 
   //////////////////////////
