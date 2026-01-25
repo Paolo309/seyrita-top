@@ -322,7 +322,7 @@ packages:
     - common_cells
     - register_interface
   snitch_cluster:
-    revision: fd6c8d9e2c29e01c5dbddac7377a5603a1b10dd0
+    revision: c5cc75662da2842bb7f752ed174f0153517baf37
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/snitch_cluster.git
