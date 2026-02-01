@@ -241,7 +241,7 @@ packages:
     - common_verification
     - tech_cells_generic
   mx-ita:
-    revision: 04ca2f3ea8c150a15622cdced7fd414a3eefd5a5
+    revision: e871eb145aa25092a85824f59953729c6e4bbc59
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/mx-ita.git
@@ -322,7 +322,7 @@ packages:
     - common_cells
     - register_interface
   snitch_cluster:
-    revision: c5cc75662da2842bb7f752ed174f0153517baf37
+    revision: 132d18d2744dcd95e66a08fbc554e9f457083c97
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/snitch_cluster.git
