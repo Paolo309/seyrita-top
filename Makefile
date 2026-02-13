@@ -60,7 +60,6 @@ python-venv: .venv
 .venv:
 	$(BASE_PYTHON) -m venv $@
 	. $@/bin/activate && \
-	python -m pip install --upgrade pip setuptools && \
 	python -m pip install --cache-dir $(PIP_CACHE_DIR) -r requirements.txt
 
 #################
