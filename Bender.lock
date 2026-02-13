@@ -128,8 +128,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 9afda9abb565971649c2aa0985639c096f351171
-    version: 1.38.0
+    revision: 9ca8a7655f741e7dd5736669a20a301325194c28
+    version: 1.39.0
     source:
       Git: https://github.com/pulp-platform/common_cells
     dependencies:
@@ -241,7 +241,7 @@ packages:
     - common_verification
     - tech_cells_generic
   mx-ita:
-    revision: e871eb145aa25092a85824f59953729c6e4bbc59
+    revision: 4ae578d1335eca8bba8e1130ffa6f0bfc197ae78
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/mx-ita.git
@@ -322,7 +322,7 @@ packages:
     - common_cells
     - register_interface
   snitch_cluster:
-    revision: 132d18d2744dcd95e66a08fbc554e9f457083c97
+    revision: a7f4365a0864ad59b0c5e24deaae0fe659dbb2b2
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:seyrita/mx-ita/snitch_cluster.git

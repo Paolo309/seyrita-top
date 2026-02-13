@@ -48,10 +48,11 @@ module chimera_top_xilinx (
         .clk_in1 ( sys_clk ),
         .reset   ( '0 ),
         .locked  ( ),
-        .clk_50  ( soc_clk ),
+        .clk_50  ( ),
         .clk_48  ( ),
         .clk_20  ( ),
-        .clk_10  ( )
+        .clk_10  ( ),
+        .clk_40  ( soc_clk )
     );
 
 
@@ -105,7 +106,7 @@ module chimera_top_xilinx (
         counter_d = counter_q + 1;
         rtc_clk_d = rtc_clk_q;
 
-        if(counter_q == 24) begin
+        if(counter_q == 19) begin
             counter_d = '0;
             rtc_clk_d = ~rtc_clk_q;
         end

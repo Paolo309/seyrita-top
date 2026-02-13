@@ -223,9 +223,6 @@ module mxita_cluster
     sram_cfg_t tcdm;
   } sram_cfgs_t;
 
-  localparam int unsigned NumIntOutstandingLoads[NrCores] = '{NrCores{32'h1}};
-  localparam int unsigned NumIntOutstandingMem[NrCores] = '{NrCores{32'h4}};
-
   typedef logic [WideDataWidth-1:0] data_dma_t;
   typedef logic [WideDataWidth/8-1:0] strb_dma_t;
   typedef logic [TcdmAddrWidth-1:0] tcdm_addr_t;
@@ -241,7 +238,7 @@ module mxita_cluster
   typedef logic [HWPECtrlAddrWidth-1:0] addr_hwpe_ctrl_t;
   typedef logic [HWPECtrlDataWidth-1:0] data_hwpe_ctrl_t;
   typedef logic [3:0] strb_hwpe_ctrl_t;
-  typedef logic [ClusterNarrowAxiMstIdWidth+2-1:0] narrow_out_id_t;
+  typedef logic [ClusterNarrowAxiMstIdWidth+2-1:0] narrow_out_id_t; // TODO add parameter (should be same as hwpe_ctrl_req_i.q.user)
 
   // TODO remove snitch_cluster_pkg::narrow_out_id_t with Chimera defined one
   `AXI_TYPEDEF_ALL(cluster_narrow_out_dw_conv, axi_addr_t,
@@ -273,6 +270,18 @@ module mxita_cluster
       default: 0
   };
 
+  localparam int unsigned NumIntOutstandingLoads[NrCores] = '{NrCores{32'd1}};
+  localparam int unsigned NumIntOutstandingMem[NrCores] = '{NrCores{32'd4}};
+
+  localparam int unsigned NumFPOutstandingLoads[NrCores] = '{NrCores{32'd4}};
+  localparam int unsigned NumFPOutstandingMem[NrCores] = '{NrCores{32'd4}};
+  localparam int unsigned NumDTLBEntries[NrCores] = '{NrCores{32'd1}};
+  localparam int unsigned NumITLBEntries[NrCores] = '{NrCores{32'd1}};
+  localparam int unsigned NumSequencerInstr[NrCores] = '{default: 32'd32, NrCores-1: 32'd16};
+  localparam int unsigned NumSequencerLoops[NrCores] = '{default: 32'd2, NrCores-1: 32'd1};
+  localparam int unsigned NumSsrs[NrCores] = '{NrCores{32'd3}};
+  localparam int unsigned SsrMuxRespDepth[NrCores] = '{NrCores{32'd4}};
+
   snitch_cluster #(
     .PhysicalAddrWidth(Cfg.ChsCfg.AddrWidth),
     .NarrowDataWidth  (ClusterDataWidth),
@@ -301,16 +310,16 @@ module mxita_cluster
 
     .NrHives(1),
     .NrCores(NrCores),
-    .TCDMDepth(1024),
+    .TCDMDepth(256), // XXX TCDMSize = next pow of 2 (8 * TCDMDepth * NrBanks)
     .ZeroMemorySize(64),
-    // .ExtMemorySize (0), // not set in Chimera (no ext memory?) // TODO check in old snitch
+    .ExtMemorySize (1),
     .ClusterPeriphSize(64),
-    .NrBanks(16),
-    .NrHyperBanks(1),
-    .DMANumAxInFlight(3),
-    .DMAReqFifoDepth(3),
+    .NrBanks(48),
+    .NrHyperBanks(2),
+    .DMANumAxInFlight(3), // TODO [FPGA] try with 24
+    .DMAReqFifoDepth(3), // TODO [FPGA] try with 8
     .ICacheLineWidth('{256}),
-    .ICacheLineCount('{16}),
+    .ICacheLineCount('{16}), // TODO [FPGA] try with 128
     .ICacheWays('{2}),
     .VMSupport(0),
     .EnableDMAMulticast(0),  // not set in Chimera (default is zero), but set to 1 by mxita wrapper
@@ -328,7 +337,57 @@ module mxita_cluster
     .sram_cfgs_t(sram_cfgs_t),
 
     .RegisterExtWide  ('0),
-    .RegisterExtNarrow('0)
+    .RegisterExtNarrow('0),
+    .AtomicIdWidth (1), // FIXME?
+
+    .DMANumChannels (1),
+    .NumExpWideTcdmPorts (1),
+    .RVE (5'b00000),
+    .RVF (5'b11111),
+    .RVD (5'b11111),
+    .XDivSqrt (5'b00000),
+    .XF16 (5'b01111),
+    .XF16ALT (5'b01111),
+    .XF8 (5'b01111),
+    .XF8ALT (5'b01111),
+    .XFVEC (5'b01111),
+    .XFDOTP (5'b01111),
+    .Xssr (5'b01111),
+    .Xfrep (5'b01111),
+    .Xcopift (5'b01111),
+    .FPUImplementation (snitch_cluster_pkg::FPUImplementation),
+    .NumFPOutstandingLoads (NumFPOutstandingLoads),
+    .NumFPOutstandingMem (NumFPOutstandingMem),
+    .NumDTLBEntries (NumDTLBEntries),
+    .NumITLBEntries (NumITLBEntries),
+    .NumSsrsMax (3),
+    .NumSsrs (NumSsrs),
+    .SsrMuxRespDepth (SsrMuxRespDepth),
+    .SsrRegs (snitch_cluster_pkg::SsrRegs),
+    .SsrCfgs (snitch_cluster_pkg::SsrCfgs),
+    .NumSequencerInstr (NumSequencerInstr),
+    .NumSequencerLoops (NumSequencerLoops),
+    .Hive (snitch_cluster_pkg::Hive),
+    .Topology (snitch_pkg::LogarithmicInterconnect),
+    .Radix (2),
+    .NumSwitchNets (4),
+    .SwitchLfsrArbiter (0),
+    .RegisterTCDMCuts (0),
+    .RegisterExpNarrow (0),
+    .RegisterFPUReq (1),
+    .RegisterFPUIn (1),
+    .RegisterFPUOut (1),
+    .RegisterSequencer (0),
+    .IsoCrossing (0),
+    .NarrowXbarLatency (axi_pkg::CUT_ALL_PORTS),
+    .WideXbarLatency (axi_pkg::CUT_ALL_PORTS),
+    .WideMaxMstTrans (32),
+    .WideMaxSlvTrans (32),
+    .NarrowMaxMstTrans (4),
+    .NarrowMaxSlvTrans (4),
+    .CaqDepth (8),
+    .CaqTagWidth (16),
+    .DebugSupport (0)
   ) i_test_cluster (
 
     .clk_i          (clu_clk_i),

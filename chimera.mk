@@ -6,8 +6,8 @@
 # Lorenzo Leone <lleone@iis.ee.ethz.ch>
 
 
-CLINTCORES = 19 # 1 + total number of cores (e.g. 5 clusters * 9 cores + 1 = 46) # TODO check if true
-PLICCORES = 38 # 2 + 2 * total number of cores (e.g. 5 clusters * 9 cores + 2 = 92) # TODO check if true
+CLINTCORES = 11 # 1 + total number of cores (e.g. 5 clusters * 9 cores + 1 = 46) # TODO check if true
+PLICCORES = 22 # 2 + 2 * total number of cores (e.g. 5 clusters * 9 cores + 2 = 92) # TODO check if true
 PLIC_NUM_INTRS = 32
 
 
