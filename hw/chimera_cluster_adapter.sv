@@ -339,7 +339,9 @@ module chimera_cluster_adapter #(
     .ar_chan_t (axi_narrow_soc_in_ar_chan_t),
     .r_chan_t  (axi_narrow_soc_in_r_chan_t),
     .axi_req_t (narrow_in_req_t),
-    .axi_resp_t(narrow_in_resp_t)
+    .axi_resp_t(narrow_in_resp_t),
+    .LogDepth  (3),
+    .SyncStages(2)
   ) narrow_slv_cdc (
     .src_clk_i (soc_clk_i),
     .src_rst_ni(rst_ni),
@@ -361,7 +363,9 @@ module chimera_cluster_adapter #(
     .ar_chan_t (axi_narrow_soc_out_ar_chan_t),
     .r_chan_t  (axi_narrow_soc_out_r_chan_t),
     .axi_req_t (narrow_out_req_t),
-    .axi_resp_t(narrow_out_resp_t)
+    .axi_resp_t(narrow_out_resp_t),
+    .LogDepth  (3),
+    .SyncStages(2)
   ) narrow_mst_cdc (
     .src_clk_i (clu_clk_i),
     .src_rst_ni(rst_ni),
@@ -383,7 +387,9 @@ module chimera_cluster_adapter #(
     .ar_chan_t (axi_wide_clu_out_ar_chan_t),
     .r_chan_t  (axi_wide_clu_out_r_chan_t),
     .axi_req_t (wide_out_req_t),
-    .axi_resp_t(wide_out_resp_t)
+    .axi_resp_t(wide_out_resp_t),
+    .LogDepth  (3),
+    .SyncStages(2)
   ) wide_mst_cdc (
     .src_clk_i (clu_clk_i),
     .src_rst_ni(rst_ni),
