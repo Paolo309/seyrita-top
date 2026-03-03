@@ -17,7 +17,7 @@ packages:
     - obi_peripherals
     - register_interface
   axi:
-    revision: 8e04779f341eb2c89412aae92223a292beef487e
+    revision: f3bc7865de5eb98c79ce18864d7df5ba67c4f68e
     version: null
     source:
       Git: https://github.com/colluca/axi
