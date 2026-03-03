@@ -146,12 +146,6 @@ package chimera_pkg;
   localparam int unsigned LogDepth = 3;
   localparam int unsigned SyncStages = 3;
 
-  // ------------
-  // |   TCDM   |
-  // ------------
-  localparam doub_bt TcdmSize = 128;
-  localparam aw_bt TcdmAddrWidth = $clog2(TcdmSize * 1024);
-
   // -------------------
   // |   Generate Cfg   |
   // --------------------
