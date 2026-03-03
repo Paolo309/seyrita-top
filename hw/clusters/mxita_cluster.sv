@@ -223,7 +223,7 @@ module mxita_cluster
     sram_cfg_t tcdm;
   } sram_cfgs_t;
 
-  localparam int unsigned TcdmSizeBytes = 128 * 1024;
+  localparam int unsigned TcdmSizeBytes = 96 * 1024;
   localparam int unsigned TcdmAddrWidth = $clog2(TcdmSizeBytes);
 
   typedef logic [WideDataWidth-1:0] data_dma_t;
@@ -273,17 +273,16 @@ module mxita_cluster
       default: 0
   };
 
-  localparam int unsigned NumIntOutstandingLoads[NrCores] = '{NrCores{32'd1}};
-  localparam int unsigned NumIntOutstandingMem[NrCores] = '{NrCores{32'd4}};
-
-  localparam int unsigned NumFPOutstandingLoads[NrCores] = '{NrCores{32'd4}};
-  localparam int unsigned NumFPOutstandingMem[NrCores] = '{NrCores{32'd4}};
-  localparam int unsigned NumDTLBEntries[NrCores] = '{NrCores{32'd1}};
-  localparam int unsigned NumITLBEntries[NrCores] = '{NrCores{32'd1}};
-  localparam int unsigned NumSequencerInstr[NrCores] = '{default: 32'd32, NrCores-1: 32'd16};
-  localparam int unsigned NumSequencerLoops[NrCores] = '{default: 32'd2, NrCores-1: 32'd1};
-  localparam int unsigned NumSsrs[NrCores] = '{NrCores{32'd3}};
-  localparam int unsigned SsrMuxRespDepth[NrCores] = '{NrCores{32'd4}};
+  localparam int unsigned NumIntOutstandingLoads[NrCores] = '{NrCores{32'd4}};
+  localparam int unsigned NumIntOutstandingMem[NrCores]   = '{NrCores{32'd4}};
+  localparam int unsigned NumFPOutstandingLoads[NrCores]  = '{NrCores{32'd4}};
+  localparam int unsigned NumFPOutstandingMem[NrCores]    = '{NrCores{32'd4}};
+  localparam int unsigned NumDTLBEntries[NrCores]         = '{NrCores{32'd1}};
+  localparam int unsigned NumITLBEntries[NrCores]         = '{NrCores{32'd1}};
+  localparam int unsigned NumSequencerInstr[NrCores]      = '{default: 32'd32, NrCores-1: 32'd16};
+  localparam int unsigned NumSequencerLoops[NrCores]      = '{default: 32'd2, NrCores-1: 32'd1};
+  localparam int unsigned NumSsrs[NrCores]                = '{NrCores{32'd3}};
+  localparam int unsigned SsrMuxRespDepth[NrCores]        = '{NrCores{32'd4}};
 
   snitch_cluster #(
     .PhysicalAddrWidth(Cfg.ChsCfg.AddrWidth),
@@ -313,16 +312,20 @@ module mxita_cluster
 
     .NrHives(1),
     .NrCores(NrCores),
-    .TCDMDepth(256), // XXX TCDMSize = next pow of 2 (8 * TCDMDepth * NrBanks)
+    
+    // Actual TCDM size = TCDMDepth * NrBanks * ClusterDataWidth/8
+    // TCDM's address space is aligned to next power of two of actual TCDM size
+    .TCDMDepth(256),
+    .NrBanks(48), // 48 * 256 * 8 = 96 KiB
+    .NrHyperBanks(2),
+
     .ZeroMemorySize(64),
     .ExtMemorySize (1),
     .ClusterPeriphSize(64),
-    .NrBanks(48),
-    .NrHyperBanks(2),
     .DMANumAxInFlight(3), // TODO [FPGA] try with 24
     .DMAReqFifoDepth(3), // TODO [FPGA] try with 8
     .ICacheLineWidth('{256}),
-    .ICacheLineCount('{16}), // TODO [FPGA] try with 128
+    .ICacheLineCount('{128}),
     .ICacheWays('{2}),
     .VMSupport(0),
     .EnableDMAMulticast(0),  // not set in Chimera (default is zero), but set to 1 by mxita wrapper
