@@ -20,9 +20,9 @@ module vip_chimera_soc
   parameter type         axi_ext_mst_req_t      = logic,
   parameter type         axi_ext_mst_rsp_t      = logic,
   // Timing
-  parameter time         ClkPeriodClu           = 2ns,
-  parameter time         ClkPeriodSys           = 5ns,
-  parameter time         ClkPeriodJtag          = 20ns,
+  parameter time         ClkPeriodClu           = 25ns,
+  parameter time         ClkPeriodSys           = 25ns,
+  parameter time         ClkPeriodJtag          = 100ns,
   parameter time         ClkPeriodRtc           = 1000ns, //30518ns,
   parameter int unsigned RstCycles              = 5,
   parameter real         TAppl                  = 0.1,
