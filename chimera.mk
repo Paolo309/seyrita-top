@@ -6,8 +6,8 @@
 # Lorenzo Leone <lleone@iis.ee.ethz.ch>
 
 
-CLINTCORES = 46     # 1 + tot. #cores (e.g. 5 clusters * 9 cores + 1 = 46)
-PLICCORES = 92      # 2 + 2 * tot. #cores (e.g. 2 * 5 clusters * 9 cores + 2 = 92)
+CLINTCORES = 11     # 1 + tot. #cores (e.g. 5 clusters * 9 cores + 1 = 46)
+PLICCORES = 22      # 2 + 2 * tot. #cores (e.g. 2 * 5 clusters * 9 cores + 2 = 92)
 PLIC_NUM_INTRS = 59 # 58 + ChsCfg.NumExtInIntrs + 1
 
 

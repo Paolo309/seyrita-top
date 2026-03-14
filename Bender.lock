@@ -17,7 +17,7 @@ packages:
     - obi_peripherals
     - register_interface
   axi:
-    revision: 8e04779f341eb2c89412aae92223a292beef487e
+    revision: f3bc7865de5eb98c79ce18864d7df5ba67c4f68e
     version: null
     source:
       Git: https://github.com/colluca/axi
@@ -37,8 +37,8 @@ packages:
     - register_interface
     - tech_cells_generic
   axi_riscv_atomics:
-    revision: 0ac3a78fe342c5a5b9b10bff49d58897f773059e
-    version: 0.8.2
+    revision: 97a1dd2ac643c276880420a0cf8eea697f228aa9
+    version: 0.8.3
     source:
       Git: https://github.com/pulp-platform/axi_riscv_atomics.git
     dependencies:
@@ -128,8 +128,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 9afda9abb565971649c2aa0985639c096f351171
-    version: 1.38.0
+    revision: 9ca8a7655f741e7dd5736669a20a301325194c28
+    version: 1.39.0
     source:
       Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
@@ -166,8 +166,35 @@ packages:
       Git: https://github.com/pulp-platform/fpu_div_sqrt_mvp.git
     dependencies:
     - common_cells
+  hci:
+    revision: 142769d44d7c7a0a88eaa9d074bcae232cf7a3df
+    version: null
+    source:
+      Git: https://github.com/pulp-platform/hci.git
+    dependencies:
+    - cluster_interconnect
+    - common_cells
+    - hwpe-stream
+    - l2_tcdm_hybrid_interco
+    - redundancy_cells
+    - register_interface
+  hwpe-ctrl:
+    revision: ce04de5fc48df0d536cae32301ccd83d93c05430
+    version: 3.0.0
+    source:
+      Git: https://github.com/pulp-platform/hwpe-ctrl.git
+    dependencies:
+    - common_cells
+    - tech_cells_generic
+  hwpe-stream:
+    revision: 35f6bb74b28acc5922262cf0244e7a7c7fe6a589
+    version: 1.9.2
+    source:
+      Git: https://github.com/pulp-platform/hwpe-stream.git
+    dependencies:
+    - tech_cells_generic
   hyperbus:
-    revision: 841deb9d821b63bf05a1c85d3a4746352a8bcae2
+    revision: 6410314320b201eb61161802f21bdb5a27a165f7
     version: null
     source:
       Git: https://github.com/pulp-platform/hyperbus.git
@@ -197,6 +224,24 @@ packages:
     - axi
     - common_cells
     - register_interface
+  l2_tcdm_hybrid_interco:
+    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
+    version: 1.0.0
+    source:
+      Git: https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git
+    dependencies: []
+  manta:
+    revision: 05a26044ebf1e88f9a658bb1eb695f69cd129a13
+    version: null
+    source:
+      Git: git@iis-git.ee.ethz.ch:torik/rtl/manta.git
+    dependencies:
+    - common_cells
+    - fpnew
+    - hci
+    - hwpe-ctrl
+    - hwpe-stream
+    - scm
   memory_island:
     revision: 64828cb7a9ccc1f1656ec92d06129072f445c319
     version: null
@@ -233,9 +278,19 @@ packages:
     - common_cells
     - register_interface
     - tech_cells_generic
+  redundancy_cells:
+    revision: c37bdb47339bf70e8323de8df14ea8bbeafb6583
+    version: null
+    source:
+      Git: https://github.com/pulp-platform/redundancy_cells.git
+    dependencies:
+    - common_cells
+    - common_verification
+    - register_interface
+    - tech_cells_generic
   register_interface:
-    revision: 8e8c209ea559d3b54f45cf30fcce95ce70ff5e49
-    version: 0.4.6
+    revision: d6e1d4cdaab7870f4faf3f88a1c788eaf5ac129d
+    version: 0.4.7
     source:
       Git: https://github.com/pulp-platform/register_interface.git
     dependencies:
@@ -252,8 +307,8 @@ packages:
     - common_cells
     - tech_cells_generic
   scm:
-    revision: 472f99affe44ff7b282b519c047a3cfeb35b16c6
-    version: 1.2.0
+    revision: 1976c7efb4979271eee2abe262fde0f9a20e2557
+    version: 1.2.1
     source:
       Git: https://github.com/pulp-platform/scm.git
     dependencies:
@@ -268,10 +323,10 @@ packages:
     - common_cells
     - register_interface
   snitch_cluster:
-    revision: 5b2fccd96c42812774c20ab2f9b811e164809789
+    revision: a718b1790ba81a8bc52d51036d1e87f2fce97c65
     version: null
     source:
-      Git: https://github.com/pulp-platform/snitch_cluster.git
+      Git: git@iis-git.ee.ethz.ch:torik/rtl/snitch_cluster.git
     dependencies:
     - apb
     - axi
@@ -280,6 +335,7 @@ packages:
     - common_cells
     - fpnew
     - idma
+    - manta
     - riscv-dbg
     - tech_cells_generic
   tech_cells_generic:

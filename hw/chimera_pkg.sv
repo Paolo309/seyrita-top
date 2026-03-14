@@ -17,13 +17,13 @@ package chimera_pkg;
   typedef bit [63:0] doub_bt;
   typedef bit [15:0] shrt_bt;
 
-  typedef enum logic [0:0] {SNITCH} cluster_type_e;
+  typedef enum logic [0:0] {SNITCH, MANTA} cluster_type_e;
 
   // --------------------------
   // | Cluster domain config  |
   // --------------------------
 
-  localparam int ExtClusters = 5;
+  localparam int ExtClusters = 2;
 
   // List of supported clusters type
   typedef struct packed {
@@ -39,10 +39,10 @@ package chimera_pkg;
   //  - The type of cluster to instantiate (make sure the type is defined)
 
   localparam cluster_config_t ChimeraClusterCfg = '{
-      hasWideMasterPort: {1'b1, 1'b1, 1'b1, 1'b1, 1'b1},
-      NrCores: {8'h9, 8'h9, 8'h9, 8'h9, 8'h9},
-      ClusterType: {SNITCH, SNITCH, SNITCH, SNITCH, SNITCH},
-      EnAxiCdc: {1'b1, 1'b1, 1'b1, 1'b1, 1'b1}
+      hasWideMasterPort: {1'b1, 1'b1},
+      NrCores: {8'h5, 8'h5},
+      ClusterType: {MANTA, MANTA},
+      EnAxiCdc: {1'b1, 1'b1}
   };
 
   function automatic int _sumVector(byte_bt [iomsb(ExtClusters):0] vector, int vectorLen);
@@ -183,6 +183,7 @@ ExtClusters
     cfg.AxiDataWidth = 32;
     cfg.AddrWidth = 48;
     cfg.LlcOutRegionEnd = 'hFFFF_FFFF;
+    cfg.AxiUserWidth = 3;
 
     cfg.AxiExtNumWideMst = $countones(ChimeraClusterCfg.hasWideMasterPort);
 

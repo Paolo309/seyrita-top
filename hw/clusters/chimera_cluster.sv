@@ -343,7 +343,8 @@ module chimera_cluster
     .narrow_ext_req_o (),
     .narrow_ext_resp_i('0),
     .tcdm_ext_req_i   ('0),
-    .tcdm_ext_resp_o  ()
+    .tcdm_ext_resp_o  (),
 
+    .hwpe_clk_en_o ()
   );
 endmodule

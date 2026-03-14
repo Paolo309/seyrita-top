@@ -29,7 +29,7 @@ HYPERB_ROOT ?= .
 
 # Use the default snitch cluster cfg. For the moment chimera
 # does not use the snitch_cluster_wrapper feature but we need to generate some files.
-SN_CFG = $(SN_ROOT)/cfg/default.json
+SN_CFG = $(SN_ROOT)/cfg/manta.json
 
 # Bender prerequisites
 BENDER_YML = $(CHIM_ROOT)/Bender.yml
