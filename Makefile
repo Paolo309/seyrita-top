@@ -26,6 +26,7 @@ CHS_ROOT    ?= .
 SN_ROOT ?= .
 IDMA_ROOT   ?= .
 HYPERB_ROOT ?= .
+CHISDK_ROOT ?= $(call submodule_path,chimera-sdk)
 
 # Use the default snitch cluster cfg. For the moment chimera
 # does not use the snitch_cluster_wrapper feature but we need to generate some files.
@@ -48,6 +49,7 @@ CHIM_SW_DIR ?= $(CHIM_ROOT)/sw
 ########
 BASE_PYTHON ?= python
 PIP_CACHE_DIR ?= $(CHIM_ROOT)/.cache/pip
+SINGULARITY_CACHE_DIR ?= $(CHIM_ROOT)/.cache/singularity
 
 .PHONY: dvt-flist pythomn-venv python-venv-clean
 

@@ -87,6 +87,41 @@ $(CHIM_ROOT)/hw/regs/chimera_reg_pkg.sv $(CHIM_ROOT)/hw/regs/chimera_reg_top.sv:
 TB_DUT = tb_chimera_soc
 -include $(CHIM_ROOT)/target/sim/sim.mk
 
+###############
+# CHIMERA-SDK #
+###############
+CHIM_SDK_TARGET ?= chimera-mxita
+HARDWARE_BACKEND ?= RTL
+
+$(CHISDK_ROOT)/deeploy_devel.sif:
+	@echo "Pulling DeEploy Singularity image. This may take a while..."
+	cd $(CHISDK_ROOT) && \
+	SINGULARITY_CACHEDIR=$(SINGULARITY_CACHE_DIR) singularity pull docker://ghcr.io/pulp-platform/deeploy:devel
+
+$(CHISDK_ROOT)/build-$(HARDWARE_BACKEND): $(CHISDK_ROOT)/deeploy_devel.sif
+	cd $(CHISDK_ROOT) && \
+	singularity exec \
+		-W $(CHISDK_ROOT) \
+		-e deeploy_devel.sif /bin/bash \
+		-c "cd $(CHISDK_ROOT) && cmake -D TARGET_PLATFORM=$(CHIM_SDK_TARGET) -D TOOLCHAIN_DIR=/app/install/llvm -D HARDWARE_BACKEND=$(HARDWARE_BACKEND) -B build-$(HARDWARE_BACKEND)"
+
+chim-sdk: $(CHISDK_ROOT)/build-$(HARDWARE_BACKEND)
+	cd $(CHISDK_ROOT) && \
+	singularity exec \
+		-W $(CHISDK_ROOT) \
+		-e deeploy_devel.sif /bin/bash \
+		-c "cd $(CHISDK_ROOT) && cmake --build build-$(HARDWARE_BACKEND) -j"
+	@echo "Binaries for target '$(CHIM_SDK_TARGET)' are available in '$(CHISDK_ROOT)/build-$(HARDWARE_BACKEND)/bin'"
+
+clean-chim-sdk:
+	cd $(CHISDK_ROOT) && \
+	singularity exec \
+		-W $(CHISDK_ROOT) \
+		-e deeploy_devel.sif /bin/bash \
+		-c "cd $(CHISDK_ROOT) && cmake --build build-$(HARDWARE_BACKEND) -t clean"
+
+.PHONY: chim-sdk
+
 #################################
 # Phonies for the entire system #
 #################################
