@@ -11,7 +11,7 @@ package:
 dependencies:
   register_interface:       { git: "https://github.com/pulp-platform/register_interface.git", version: 0.4.3  }
   axi:                      { git: https://github.com/colluca/axi,                            rev: multicast }
-  cheshire:                 { git: "https://github.com/pulp-platform/cheshire.git",           rev: 586cb0225be5c57f5ffcf67bd490763efd9b4d24}
+  cheshire:                 { git: "https://github.com/Paolo309/cheshire.git",                rev: 0055fcfd42753bd405cefd7f03a871e6e181b504}
   snitch_cluster:           { git: git@iis-git.ee.ethz.ch:torik/rtl/snitch_cluster.git,       rev: chimera-integration }
   common_cells:             { git: "https://github.com/pulp-platform/common_cells.git",       version: 1.31.1}
   idma:                     { git: "https://github.com/pulp-platform/iDMA.git",               version: 0.6.5 }
