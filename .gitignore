@@ -51,5 +51,14 @@ logs
 vsim.wlf
 *.transcript
 
+# VIVADO
+
+target/xilinx/build*/
+target/xilinx/scripts/add_sources*.tcl
+*.bit
+*.ltx
+*.jou
+*.log
+
 nonfree/
 working_dir/

@@ -86,6 +86,7 @@ $(CHIM_ROOT)/hw/regs/chimera_reg_pkg.sv $(CHIM_ROOT)/hw/regs/chimera_reg_top.sv:
 # Include target makefiles
 TB_DUT = tb_chimera_soc
 -include $(CHIM_ROOT)/target/sim/sim.mk
+-include $(CHIM_ROOT)/target/xilinx/xilinx.mk
 
 ###############
 # CHIMERA-SDK #

@@ -23,7 +23,7 @@ module vip_chimera_soc
   parameter time         ClkPeriodClu           = 2ns,
   parameter time         ClkPeriodSys           = 5ns,
   parameter time         ClkPeriodJtag          = 20ns,
-  parameter time         ClkPeriodRtc           = 30518ns,
+  parameter time         ClkPeriodRtc           = 1000ns,
   parameter int unsigned RstCycles              = 5,
   parameter real         TAppl                  = 0.1,
   parameter real         TTest                  = 0.9,
