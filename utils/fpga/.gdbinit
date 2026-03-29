@@ -28,6 +28,7 @@ define hook-stop
   set $insn16 = *(unsigned short *)$pc
   if $insn32 == 0x00100073 || $insn16 == 0x9002
     printf "[GDB] Return Value: 0x%x (%d)\n", $a0, $a0
+    quit $a0
   end
 end
 
@@ -36,9 +37,9 @@ echo   oc       : Connects to OpenOCD and halts the target\n
 echo   restart  : Sets PC to _start and continues execution\n
 echo \n
 
-# oc
-# load
-# echo [GDB] Running...\n
-# c
-# echo [GDB] Finished\n
-# q
+oc
+load
+echo [GDB] Running...\n
+c
+echo [GDB] Finished\n
+q

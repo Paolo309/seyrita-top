@@ -72,6 +72,7 @@ vsim-build:
 vivado-build:
   extends: .base
   stage: build
+  timeout: 6h
   script:
     # Checkout dependencies
     - bender checkout
@@ -110,3 +111,24 @@ vsim-test:
     paths: [ "hw", "sw", "target/sim" ]
     exclude: [ "target/sim/vsim/work/**/*", "target/sim/vsim/work" ]
     expire_in: 4 weeks
+
+setup-key:
+  stage: init
+  script:
+    - mkdir -p $HOME/.ssh
+    - echo "$BOARDBERG_MSC25H20_SSH_KEY" | base64 -d > $HOME/.ssh/id_ed25519
+    - ssh-keyscan boardberg.ee.ethz.ch >> $HOME/.ssh/known_hosts 2>/dev/null
+    - chmod 600 $HOME/.ssh/id_ed25519
+  artifacts:
+    name: "ssh-key"
+    expire_in: 12 hours
+    paths:
+      - $HOME/.ssh
+
+fpga-vcu128-test:
+  stage: test
+  needs: [vivado-build, setup-key]
+  script:
+    - make test-fpga
+
+
