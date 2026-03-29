@@ -61,6 +61,9 @@ vsim-build:
     # Build Chimera Bootrom
     - make chim-bootrom-init
     # Compile SoC in vsim
+    # XXX Somehow fails the first time due to missing zip in model_tmp
+    - make chim-sim || echo "Retrying..."
+    - make chs-hw-init
     - make chim-sim
   artifacts:
     paths: [ "hw", "sw", "target/sim" ]
