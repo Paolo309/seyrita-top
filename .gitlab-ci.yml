@@ -130,5 +130,9 @@ fpga-vcu128-test:
   needs: [vivado-build, setup-key]
   script:
     - make test-fpga
+  artifacts:
+    paths:
+      - gdb_output.log
+    expire_in: 4 weeks
 
 
