@@ -66,6 +66,25 @@ vsim-build:
     paths: [ "hw", "sw", "target/sim" ]
     expire_in: 3 days
 
+vivado-build:
+  extends: .base
+  stage: build
+  script:
+    # Checkout dependencies
+    - bender checkout
+    # Build hardware
+    - make chs-hw-init
+    - make sn-hw-all
+    # Build Chimera Bootrom
+    - make chim-bootrom-init
+    # Build Chimera bitstream for VCU128
+    - make chim-xilinx-vcu128
+    # Build Chimera SDK for ASIC backend
+    - make chim-sdk HARDWARE_BACKEND=ASIC
+  artifacts:
+    paths: [ "target/xilinx/out", "sw/chim-sdk/build-ASIC" ]
+    expire_in: 3 days
+
 vsim-test:
   extends: .base
   stage: test
