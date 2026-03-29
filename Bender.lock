@@ -142,10 +142,10 @@ packages:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
   cva6:
-    revision: 630bd959c9cc69a35d461a2abc205310d2edacf8
+    revision: 46ee3e83f681e41a5f4d101bf492ad8e305f0465
     version: null
     source:
-      Git: https://github.com/Scheremo/cva6.git
+      Git: git@github.com:Paolo309/cva6.git
     dependencies:
     - axi
     - common_cells
