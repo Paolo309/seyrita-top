@@ -297,6 +297,7 @@ module manta_cluster
   localparam int unsigned NumSequencerLoops[NrCores]      = '{default: 32'd2, NrCores-1: 32'd1};
   localparam int unsigned NumSsrs[NrCores]                = '{NrCores{32'd3}};
   localparam int unsigned SsrMuxRespDepth[NrCores]        = '{NrCores{32'd4}};
+  localparam int unsigned NumMemSsrs[NrCores]             = '{NrCores{32'd3}};
 
   snitch_cluster #(
     .PhysicalAddrWidth(Cfg.ChsCfg.AddrWidth),
@@ -372,6 +373,7 @@ module manta_cluster
     .XF8ALT  (5'b01111),
     .XFVEC   (5'b01111),
     .XFDOTP  (5'b01111),
+    .XFMXDOTP(5'b01111),
     .Xssr    (5'b01111),
     .Xfrep   (5'b01111),
     .Xcopift (5'b01111),
@@ -381,8 +383,9 @@ module manta_cluster
     .NumFPOutstandingMem  (NumFPOutstandingMem),
     .NumDTLBEntries       (NumDTLBEntries),
     .NumITLBEntries       (NumITLBEntries),
-    .NumSsrsMax           (3),
+    .NumSsrsMax           (4),
     .NumSsrs              (NumSsrs),
+    .NumMemSsrs           (NumMemSsrs),
     .SsrMuxRespDepth      (SsrMuxRespDepth),
     .SsrRegs              (snitch_cluster_pkg::SsrRegs),
     .SsrCfgs              (snitch_cluster_pkg::SsrCfgs),

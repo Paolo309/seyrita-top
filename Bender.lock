@@ -152,10 +152,10 @@ packages:
     - fpnew
     - tech_cells_generic
   fpnew:
-    revision: a8e0cba6dd50f357ece73c2c955d96efc3c6c315
+    revision: 0a98bcd90a4d3b584b6a8eba2157670eb0450ae7
     version: null
     source:
-      Git: https://github.com/pulp-platform/cvfpu.git
+      Git: git@github.com:Paolo309/cvfpu.git
     dependencies:
     - common_cells
     - fpu_div_sqrt_mvp
@@ -323,7 +323,7 @@ packages:
     - common_cells
     - register_interface
   snitch_cluster:
-    revision: a718b1790ba81a8bc52d51036d1e87f2fce97c65
+    revision: 29333d94c12d41e314af802af1e82cd0bcba84be
     version: null
     source:
       Git: git@iis-git.ee.ethz.ch:torik/rtl/snitch_cluster.git
