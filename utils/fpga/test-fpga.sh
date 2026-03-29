@@ -57,16 +57,9 @@ make chim-xilinx-reset-$BOARD_CLASS CHIM_XILINX_HWS_URL=$REMOTE_HOST:$TCP_PORT
 # PREPARE GDB AND LAUNCH OPENOCD #
 ###################################
 
-# XXX use a specific .gdbinit for CI
-# cp "$CHISDK_ROOT/.gdbinit" .
-# # sed -i "s/target extended-remote localhost:3333/target extended-remote $REMOTE_HOST:$GDB_PORT/" .gdbinit
-# sed -i "s/target extended-remote localhost:3333/target extended-remote localhost:$GDB_PORT/" .gdbinit
-# printf "\noc\nload\ncontinue\nquit\n" >> .gdbinit
+sed -i "s/\$oc_port = [0-9]*/\$oc_port = $GDB_PORT/" utils/fpga/.gdbinit
 
-# echo "[DEBUG]"
-# cat ".gdbinit"
-
-scp .gdbinit $REMOTE_USER@$REMOTE_HOST:$WORKDIR/
+scp utils/fpga/.gdbinit $REMOTE_USER@$REMOTE_HOST:$WORKDIR/
 scp utils/fpga/openocd.*.tcl $REMOTE_USER@$REMOTE_HOST:$WORKDIR/
 scp $CHISDK_ROOT/build-ASIC/bin/test_snitchCluster_mxita $REMOTE_USER@$REMOTE_HOST:$WORKDIR/
 

@@ -8,9 +8,11 @@ set remotetimeout 120
 
 set architecture riscv:rv32
 
+set $oc_port = 3333
+
 # ---- Helpers ----
 define oc
-  target extended-remote localhost:15285
+  eval "target extended-remote localhost:%d", $oc_port
   monitor reset halt
   echo Connected and halted.\n
 end
