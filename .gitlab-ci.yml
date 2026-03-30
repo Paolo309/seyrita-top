@@ -72,7 +72,7 @@ vsim-build:
 vivado-build:
   extends: .base
   stage: build
-  timeout: 6h
+  timeout: 12h
   script:
     # Checkout dependencies
     - bender checkout
