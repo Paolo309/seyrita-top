@@ -88,7 +88,7 @@ vivado-build:
     # Build Chimera SDK for ASIC backend
     - make chim-sdk HARDWARE_BACKEND=ASIC
   artifacts:
-    paths: [ "target/xilinx/out", "sw/chim-sdk/build-ASIC" ]
+    paths: [ "target/xilinx/out", "sw/chimera-sdk/build-ASIC" ]
     expire_in: 3 days
 
 vsim-test:
